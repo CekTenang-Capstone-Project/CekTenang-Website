@@ -6,8 +6,6 @@ import { useLanguage } from "../contexts/LanguageContext";
 
 // Asset
 import logo from "../assets/img/logo.png";
-import eye from "../assets/icons/eye.png";
-import hidden from "../assets/icons/hidden.png";
 
 // Component
 import InputPassword from "../components/InputPassword";
@@ -19,8 +17,6 @@ import LeftPanel from "../../layouts/LeftPanel";
 function NewPassword() {
   const [password, onPasswordChange] = useInput("");
   const [confirmPassword, onConfirmPasswordChange] = useInput("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
