@@ -3,7 +3,8 @@ import AuthenticationRepositories from '../repositories/authentication-repositor
 import UserRepositories from '../../users/repositories/user-repositories.js';
 import TokenManager from '../../../security/token-manager.js';
 import response from '../../../utils/response.js';
-import { AuthenticationError } from '../../../exceptions/index.js';
+import { AuthenticationError, NotFoundError, InvariantError } from '../../../exceptions/index.js';
+import { sendPasswordResetEmail } from '../../../utils/mail-sender.js';
 
 export const login = async (req, res, next) => {
   const { email, password } = req.validated;
@@ -93,4 +94,42 @@ export const logout = async (req, res, next) => {
   await AuthenticationRepositories.deleteRefreshToken(refreshToken);
 
   return response(res, 200, 'Refresh token berhasil dihapus');
+};
+
+export const forgotPassword = async (req, res, next) => {
+  const { email } = req.validated;
+
+  const isEmailRegistered = await UserRepositories.verifyNewEmail(email);
+  if (!isEmailRegistered) {
+    return next(new NotFoundError('Email tidak terdaftar'));
+  }
+
+  const token = nanoid(32);
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour expiration
+
+  await UserRepositories.saveResetToken(email, token, expiresAt.toISOString());
+
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+
+  try {
+    await sendPasswordResetEmail(email, resetUrl);
+    return response(res, 200, 'Tautan pemulihan kata sandi telah dikirim ke email Anda');
+  } catch (error) {
+    return next(new InvariantError(`Gagal mengirim email: ${error.message}`));
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  const { token, password } = req.validated;
+
+  const user = await UserRepositories.verifyResetToken(token);
+  if (!user) {
+    return next(new InvariantError('Tautan pemulihan tidak valid atau telah kedaluwarsa'));
+  }
+
+  await UserRepositories.updatePassword(user.id, password);
+
+  return response(res, 200, 'Kata sandi berhasil diubah, silakan masuk kembali');
 };

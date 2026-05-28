@@ -92,6 +92,49 @@ class UserRepositories {
     const result = await this.pool.query(query);
     return result.rows;
   }
+
+  async saveResetToken(email, token, expiresAt) {
+    const query = {
+      text: `UPDATE users 
+             SET reset_token = $1, reset_token_expires_at = $2, updated_at = $3
+             WHERE email = $4
+             RETURNING id`,
+      values: [token, expiresAt, new Date().toISOString(), email],
+    };
+    const result = await this.pool.query(query);
+    return result.rows[0];
+  }
+
+  async verifyResetToken(token) {
+    const query = {
+      text: `SELECT id, email, reset_token_expires_at FROM users 
+             WHERE reset_token = $1`,
+      values: [token],
+    };
+    const result = await this.pool.query(query);
+    if (result.rows.length === 0) {
+      return null;
+    }
+    const user = result.rows[0];
+    const expiresAt = new Date(user.reset_token_expires_at);
+    if (expiresAt < new Date()) {
+      return null; // Expired
+    }
+    return user;
+  }
+
+  async updatePassword(id, password) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const updatedAt = new Date().toISOString();
+    const query = {
+      text: `UPDATE users 
+             SET password = $1, reset_token = NULL, reset_token_expires_at = NULL, updated_at = $2
+             WHERE id = $3`,
+      values: [hashedPassword, updatedAt, id],
+    };
+    await this.pool.query(query);
+    await this.deleteUserCache(id);
+  }
 }
 
 export default new UserRepositories();
