@@ -8,4 +8,5 @@ stress-detector-ml/**/__pycache__/
 *.keras
 *.pkl
 *.joblib
-stress-detector-ml/prediction_service/saved_models/
+stress-detector-ml/models/
+stress-detector-ml/artifacts/

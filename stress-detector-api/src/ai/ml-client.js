@@ -9,23 +9,29 @@
  * request still succeeds (activity is saved; prediction is simply null).
  */
 
-let predictUrl = process.env.PREDICT_SERVICE_URL || 'http://localhost:8000';
-if (predictUrl && !predictUrl.startsWith('http://') && !predictUrl.startsWith('https://')) {
-  predictUrl = `http://${predictUrl}`;
+let mlUrl = process.env.ML_SERVICE_URL || 'http://localhost:8000';
+if (mlUrl && !mlUrl.startsWith('http://') && !mlUrl.startsWith('https://')) {
+  mlUrl = `http://${mlUrl}`;
 }
-const PREDICT_SERVICE_URL = predictUrl;
+const ML_SERVICE_URL = mlUrl;
 
-let recommendationUrl = process.env.RECOMMENDATION_SERVICE_URL || 'http://localhost:8001';
-if (recommendationUrl && !recommendationUrl.startsWith('http://') && !recommendationUrl.startsWith('https://')) {
-  recommendationUrl = `http://${recommendationUrl}`;
-}
-const RECOMMENDATION_SERVICE_URL = recommendationUrl;
+const PREDICT_SERVICE_URL = process.env.PREDICT_SERVICE_URL
+  ? (process.env.PREDICT_SERVICE_URL.startsWith('http://') || process.env.PREDICT_SERVICE_URL.startsWith('https://')
+    ? process.env.PREDICT_SERVICE_URL
+    : `http://${process.env.PREDICT_SERVICE_URL}`)
+  : ML_SERVICE_URL;
 
-let insightUrl = process.env.INSIGHT_SERVICE_URL || 'http://localhost:8002';
-if (insightUrl && !insightUrl.startsWith('http://') && !insightUrl.startsWith('https://')) {
-  insightUrl = `http://${insightUrl}`;
-}
-const INSIGHT_SERVICE_URL = insightUrl;
+const RECOMMENDATION_SERVICE_URL = process.env.RECOMMENDATION_SERVICE_URL
+  ? (process.env.RECOMMENDATION_SERVICE_URL.startsWith('http://') || process.env.RECOMMENDATION_SERVICE_URL.startsWith('https://')
+    ? process.env.RECOMMENDATION_SERVICE_URL
+    : `http://${process.env.RECOMMENDATION_SERVICE_URL}`)
+  : ML_SERVICE_URL;
+
+const INSIGHT_SERVICE_URL = process.env.INSIGHT_SERVICE_URL
+  ? (process.env.INSIGHT_SERVICE_URL.startsWith('http://') || process.env.INSIGHT_SERVICE_URL.startsWith('https://')
+    ? process.env.INSIGHT_SERVICE_URL
+    : `http://${process.env.INSIGHT_SERVICE_URL}`)
+  : ML_SERVICE_URL;
 const ML_TIMEOUT_MS = 10_000; // 10 seconds
 
 /**
