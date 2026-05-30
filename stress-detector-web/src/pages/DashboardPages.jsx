@@ -1,5 +1,3 @@
-import Navbar from "../components/Navbar/Navbar";
-import Sidebar from "../components/Sidebar/Sidebar";
 import Layout from "../../layouts/Layout";
 import Datas from "../components/DiagnosticBox/Datas";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -119,7 +117,7 @@ function DashboardPage() {
             AI
           </span>
           <h2 className="text-lg md:text-xl font-semibold text-white">
-            Rekomendasi AI Personal
+            {t.PersonalAIRecommendationTitle}
           </h2>
         </div>
 
@@ -170,7 +168,7 @@ function DashboardPage() {
     {/* Insight */}
     <div className="col-span-1 lg:col-span-4">
       <h2 className="text-xl md:text-2xl font-bold text-white mb-4">
-        Insight terbaru
+        {t.NewInsight}
       </h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

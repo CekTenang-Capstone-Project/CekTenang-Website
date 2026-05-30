@@ -1,5 +1,4 @@
-import { useState } from "react";
-import PropTypes, { bool, func } from "prop-types";
+import PropTypes from "prop-types";
 import SidebarItem from "./SidebarItem";
 import logo from "../../assets/img/logo.png";
 import IconsSidebar from "./IconsSidebar";

@@ -9,7 +9,6 @@ import ResetPassword from "./pages/ResetPassword"
 import NewPassword from "./pages/NewPassword"
 import DashboardPage from "./pages/DashboardPages"
 import ActivitiesPage from "./pages/ActivitiesPages"
-import Layout from "../layouts/Layout"
 
 export default function App() {
   return (

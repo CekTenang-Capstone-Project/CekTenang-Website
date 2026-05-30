@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useLanguage } from "../../contexts/LanguageContext";
 
-function Datas({ title, value, unit, text, metric }) {
+function Datas({ title, value, metric }) {
     const { t } = useLanguage();
 
     const getStatus = (score) => {
