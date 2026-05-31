@@ -132,6 +132,25 @@ const translations = {
     EmotionalResilienceTitle: "Ketahanan Emosional",
     EmotionalResilienceDesc: "Mood score Anda stabil di 8.4 berkat aktivitas fisik rutin (45 mnt). Ini adalah kunci Anda tetap tenang menghadapi ujian.",
 
+    // prediksi stress
+    PredictionPageTitle: "Prediksi Stres",
+    PredictionTodayScoreLabel: "Skor Hari Ini",
+    PredictionAverageLabel: "Rata-rata 7 Hari",
+    PredictionLowestLabel: "Skor Terendah",
+    PredictionHighestLabel: "Skor Tertinggi",
+    PredictionTrendTitle: "Tren Prediksi 7 Hari",
+    PredictionWeeklyAnalysisTitle: "Analisis Mingguan",
+    PredictionWeeklyAnalysisDescription: "Lanjutan stres terdeteksi pada hari Sabtu dan Minggu. Pola ini menunjukkan bahwa kesehatan mental Anda sering terganggu dengan apakah evakuasi mingguan dan persiapan awal minggu.",
+    PredictionModuleSuggestion: "Modifikasi Saran",
+    PredictionHistoryTitle: "Riwayat Prediksi",
+    PredictionHistoryTableDate: "Tanggal",
+    PredictionHistoryTableScore: "Skor",
+    PredictionHistoryTableLevel: "Level",
+    PredictionHistoryTableActivity: "Aktivitas Terkait",
+    PredictionExportPdf: "Export PDF",
+    PredictionFilterData: "Filter Data",
+    PredictionLastUpdate: "Pembaruan Terakhir",
+
   },
 
 
@@ -265,6 +284,25 @@ const translations = {
     EmotionalResilienceTitle: "Emotional Resilience",
     EmotionalResilienceDesc: "Your mood score remains stable at 8.4 thanks to regular physical activity (45 min). This is a key factor in helping you stay calm during exams.",
    
+    // prediksi stress
+    PredictionPageTitle: "Stress Prediction",
+    PredictionTodayScoreLabel: "Today's Score",
+    PredictionAverageLabel: "7-Day Average",
+    PredictionLowestLabel: "Lowest Score",
+    PredictionHighestLabel: "Highest Score",
+    PredictionTrendTitle: "7-Day Prediction Trend",
+    PredictionWeeklyAnalysisTitle: "Weekly Analysis",
+    PredictionWeeklyAnalysisDescription: "Continued stress detected on Saturday and Sunday. This pattern shows that your mental health is often disrupted by weekly evaluations and early week preparations.",
+    PredictionModuleSuggestion: "Modify Suggestions",
+    PredictionHistoryTitle: "Prediction History",
+    PredictionHistoryTableDate: "Date",
+    PredictionHistoryTableScore: "Score",
+    PredictionHistoryTableLevel: "Level",
+    PredictionHistoryTableActivity: "Related Activity",
+    PredictionExportPdf: "Export PDF",
+    PredictionFilterData: "Filter Data",
+    PredictionLastUpdate: "Last Update",
+
   },
 };
 

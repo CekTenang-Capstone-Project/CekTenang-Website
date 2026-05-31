@@ -9,6 +9,7 @@ import ResetPassword from "./pages/ResetPassword"
 import NewPassword from "./pages/NewPassword"
 import DashboardPage from "./pages/DashboardPages"
 import ActivitiesPage from "./pages/ActivitiesPages"
+import PredictionPage from "./pages/PredictionPages"
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/activities" element={<ActivitiesPage />} />
+          <Route path="/prediction" element={<PredictionPage />} />
 
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
