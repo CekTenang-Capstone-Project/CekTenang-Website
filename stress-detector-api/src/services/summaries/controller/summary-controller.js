@@ -4,7 +4,9 @@ import { InvariantError } from '../../../exceptions/index.js';
 import WeeklySummaryRepositories from '../repositories/summary-repositories.js';
 import InsightRepositories from '../../insights/repositories/insight-repositories.js';
 import RecommendationRepositories from '../../recommendations/repositories/recommendation-repositories.js';
-import { generateInsight, generateRecommendation } from '../../../ai/ml-client.js';
+import { generateWeeklyRAG } from '../../../ai/ml-client.js';
+import UserRepositories from '../../users/repositories/user-repositories.js';
+import ProducerService from '../../exports/repositories/producer-service.js';
 
 export const getWeeklySummaries = async (req, res) => {
   const { id: userId } = req.user;
@@ -39,8 +41,12 @@ export const getLatestWeeklySummary = async (req, res) => {
 export const generateWeeklySummary = async (req, res, next) => {
   const { id: userId } = req.user;
 
-  // Default to current ISO week (Mon–Sun)
-  const now = new Date();
+  // Default to current ISO week (Mon–Sun) or optional query date
+  const now = req.query.date ? new Date(req.query.date) : new Date();
+  if (isNaN(now.getTime())) {
+    return next(new InvariantError('Format tanggal tidak valid'));
+  }
+
   const dayOfWeek = now.getDay(); // 0=Sun
   const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // shift to Monday
   const weekStart = new Date(now);
@@ -59,8 +65,8 @@ export const generateWeeklySummary = async (req, res, next) => {
     userId, weekStartStr, weekEndStr,
   );
 
-  if (!activityStats || activityStats.total_days === 0) {
-    return next(new InvariantError('Tidak ada data aktivitas minggu ini untuk dirangkum'));
+  if (!activityStats || activityStats.total_days < 7) {
+    return next(new InvariantError('Dibutuhkan data aktivitas lengkap selama 7 hari (1 minggu) untuk membuat ringkasan mingguan'));
   }
 
   // 2. Aggregate stress_predictions
@@ -76,7 +82,6 @@ export const generateWeeklySummary = async (req, res, next) => {
   // 4. Collect daily stress levels for the week (for insight weekly_stress_levels)
   const dailyPredictions = predictionStats?.daily_stress_levels ?? [];
 
-  // Determine dominant stress level label for the week
   // Determine dominant stress level label for the week
   const counts = { low: 0, moderate: 0, high: 0 };
   dailyPredictions.forEach((level) => {
@@ -128,78 +133,104 @@ export const generateWeeklySummary = async (req, res, next) => {
     summaryStatus: 'generated',
   });
 
-  // 6. Build payloads for Insight and Recommendation microservices
-  const sharedFeatures = {
-    sleep_hours: activityStats.average_sleep_hours ?? null,
-    physical_activity_minutes: activityStats.average_physical_activity ?? null,
-    study_hours: activityStats.average_study_hours ?? null,
-    screen_time_hours: activityStats.average_screen_time_hours ?? null,
-    assignment_load: activityStats.average_assignment_load ?? null,
-    deadline_pressure: activityStats.average_deadline_pressure ?? null,
-    fatigue_level: activityStats.average_fatigue_level ?? null,
-    mood_score: activityStats.average_mood_score ?? null,
-    social_media_ratio: activityStats.average_social_media_ratio ?? null,
-    study_screen_balance: activityStats.average_study_screen_balance ?? null,
-    academic_pressure_index: activityStats.average_academic_pressure_index ?? null,
-    recovery_index: activityStats.average_recovery_index ?? null,
-    digital_pressure_index: activityStats.average_digital_pressure_index ?? null,
-  };
+  // 6. Fetch daily history for Weekly RAG payload
+  const dailyHistoryRows = await WeeklySummaryRepositories.getWeeklyHistory(userId, weekStartStr, weekEndStr);
+  const history = dailyHistoryRows.map((row) => {
+    const sleep = parseFloat(row.sleep_hours) || null;
+    const study = parseFloat(row.study_hours) || null;
+    const screen = parseFloat(row.screen_time_hours) || null;
+    const socialMedia = parseFloat(row.social_media_hours) || null;
+    const physical = parseInt(row.physical_activity_minutes) || null;
+    const mood = parseInt(row.mood_score) || null;
+    const fatigue = parseInt(row.fatigue_level) || null;
+    const assignment = parseInt(row.assignment_load) || null;
+    const deadline = parseInt(row.deadline_pressure) || null;
 
-  const insightPayload = {
+    // Calculate derived indices
+    const socialMediaRatio = (screen && screen > 0) ? (socialMedia / screen) : 0;
+    const studyScreenBalance = (study !== null && screen !== null) ? study / (screen + 1.0) : null;
+    const academicPressure = (assignment !== null && deadline !== null) ? (assignment + deadline) / 2.0 : null;
+    const recovery = (sleep !== null && mood !== null && fatigue !== null) ? (sleep * mood) / (fatigue + 1.0) : null;
+    const digitalPressure = (screen !== null && socialMedia !== null) ? screen + socialMedia : null;
+
+    return {
+      activity_date: row.activity_date ? new Date(row.activity_date).toISOString().split('T')[0] : null,
+      sleep_hours: sleep,
+      physical_activity_minutes: physical,
+      study_hours: study,
+      screen_time_hours: screen,
+      social_media_hours: socialMedia,
+      mood_score: mood,
+      fatigue_level: fatigue,
+      assignment_load: assignment,
+      deadline_pressure: deadline,
+      social_media_ratio: socialMediaRatio,
+      study_screen_balance: studyScreenBalance,
+      academic_pressure_index: academicPressure,
+      recovery_index: recovery,
+      digital_pressure_index: digitalPressure,
+      stress_level: row.stress_level || null,
+    };
+  });
+
+  const weeklyRAGPayload = {
     user_id: userId,
-    stress_prediction_id: predictionStats?.latest_prediction_id ?? '',
-    stress_level: stressLevelLabel,
-    input_features: sharedFeatures,
-    period_type: 'weekly',
-    weekly_summary_id: summary.id,
-    weekly_stress_levels: dailyPredictions,
+    weekly_stress_prediction: stressLevelLabel,
+    history,
   };
 
-  const recommendationPayload = {
-    user_id: userId,
-    stress_prediction_id: predictionStats?.latest_prediction_id ?? '',
-    stress_level: stressLevelLabel,
-    input_features: sharedFeatures,
-    period_type: 'weekly',
-    weekly_summary_id: summary.id,
-    max_recommendations: 3,
-  };
-
-  // 7. Call Insight and Recommendation services in parallel
-  const [insightResult, recommendationResult] = await Promise.allSettled([
-    generateInsight(insightPayload),
-    generateRecommendation(recommendationPayload),
-  ]);
-
-  const mlInsight = insightResult.status === 'fulfilled' ? insightResult.value : null;
-  const mlRecommendation = recommendationResult.status === 'fulfilled' ? recommendationResult.value : null;
+  // 7. Call Weekly RAG service
+  const weeklyRAGResult = await generateWeeklyRAG(weeklyRAGPayload);
 
   let insight = null;
-  let recommendation = null;
+  const savedRecommendations = [];
 
   // 8. Save insight if available
-  if (mlInsight?.insight_text) {
+  if (weeklyRAGResult?.insight) {
     insight = await InsightRepositories.saveInsight({
       userId,
       summaryId: summary.id,
-      insightText: mlInsight.insight_text,
+      insightText: weeklyRAGResult.insight,
     });
   }
 
-  // 9. Save recommendation(s) if available
-  if (mlRecommendation?.recommendations?.length > 0) {
-    const firstRec = mlRecommendation.recommendations[0];
-    recommendation = await RecommendationRepositories.saveRecommendation({
-      userId,
-      summaryId: summary.id,
-      recommendationText: firstRec.recommendation_text,
-    });
+  // 9. Save all recommendations if available
+  if (weeklyRAGResult?.recommendations?.length > 0) {
+    for (const rec of weeklyRAGResult.recommendations) {
+      const savedRec = await RecommendationRepositories.saveRecommendation({
+        userId,
+        summaryId: summary.id,
+        category: rec.category,
+        priorityLevel: rec.priority_level,
+        title: rec.title,
+        recommendationText: rec.text,
+      });
+      savedRecommendations.push(savedRec);
+    }
+  }
+
+  // 10. Automatically queue weekly summary report email export
+  try {
+    const userResult = await UserRepositories.getUserById(userId);
+    const user = userResult?.data;
+    if (user && user.email) {
+      const payload = {
+        userId,
+        targetEmail: user.email,
+        type: 'weekly',
+      };
+      await ProducerService.sendMessage('export:stress-results', payload);
+      console.log(`[Info] Weekly summary report email queued for user: ${user.email}`);
+    }
+  } catch (err) {
+    console.error(`[Warning] Failed to queue email export for weekly summary: ${err.message}`);
   }
 
   return response(res, 201, 'Ringkasan mingguan berhasil dibuat', {
     summary,
     insight,
-    recommendation,
-    mlAvailable: mlInsight !== null || mlRecommendation !== null,
+    recommendation: savedRecommendations[0] || null, // for backward compatibility and passing old tests
+    recommendations: savedRecommendations,
+    mlAvailable: weeklyRAGResult !== null && weeklyRAGResult.success !== false,
   });
 };

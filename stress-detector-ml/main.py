@@ -13,7 +13,24 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 import joblib
+from dotenv import load_dotenv
+from groq import Groq
 
+# Load environment variables from the script's directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Initialize Groq client
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+groq_client = None
+if GROQ_API_KEY:
+    try:
+        groq_client = Groq(api_key=GROQ_API_KEY)
+        print("[Groq] Client initialized successfully!")
+    except Exception as e:
+        print(f"[Groq] Error initializing client: {e}")
+else:
+    print("[Groq] WARNING: GROQ_API_KEY not found in environment variables. RAG endpoint will be disabled.")
 
 # ============================================================
 # Custom TensorFlow Model Layers & Loss Classes
@@ -246,6 +263,45 @@ class InsightResponse(BaseModel):
     insight_text: str
     created_at: str
 
+# RAG Schemas
+class DailyHistoryItem(BaseModel):
+    activity_date: Optional[str] = None
+    sleep_hours: Optional[float] = None
+    physical_activity_minutes: Optional[float] = None
+    study_hours: Optional[float] = None
+    screen_time_hours: Optional[float] = None
+    social_media_hours: Optional[float] = None
+    caffeine_intake_mg: Optional[float] = None
+    mood_score: Optional[float] = None
+    fatigue_level: Optional[float] = None
+    assignment_load: Optional[float] = None
+    deadline_pressure: Optional[float] = None
+    social_interaction_score: Optional[float] = None
+    financial_worry_score: Optional[float] = None
+    health_condition_score: Optional[float] = None
+    social_media_ratio: Optional[float] = None
+    study_screen_balance: Optional[float] = None
+    academic_pressure_index: Optional[float] = None
+    recovery_index: Optional[float] = None
+    digital_pressure_index: Optional[float] = None
+    stress_level: Optional[str] = None
+
+class WeeklyRAGRequest(BaseModel):
+    user_id: Union[str, int]
+    weekly_stress_prediction: str
+    history: List[DailyHistoryItem]
+
+class RAGTextItem(BaseModel):
+    category: str
+    priority_level: str
+    title: str
+    text: str
+
+class WeeklyRAGResponse(BaseModel):
+    success: bool
+    user_id: Union[str, int]
+    insight: str
+    recommendations: List[RAGTextItem]
 
 # ============================================================
 # Helper Functions
@@ -536,3 +592,152 @@ def create_insight(req: InsightRequest):
         insight_text=text,
         created_at=now,
     )
+
+@app.post("/weekly-rag", response_model=WeeklyRAGResponse)
+def generate_weekly_rag(req: WeeklyRAGRequest):
+    import json
+    if not groq_client:
+        raise HTTPException(status_code=500, detail="Groq API client is not configured. Please set GROQ_API_KEY.")
+
+    # 1. Structure RAG context
+    history_summary = []
+    for idx, day in enumerate(req.history):
+        day_info = f"Day {idx+1} ({day.activity_date or 'N/A'}): "
+        metrics = []
+        if day.sleep_hours is not None:
+            metrics.append(f"Sleep: {day.sleep_hours} hrs")
+        if day.study_hours is not None:
+            metrics.append(f"Study: {day.study_hours} hrs")
+        if day.screen_time_hours is not None:
+            metrics.append(f"Screen Time: {day.screen_time_hours} hrs")
+        if day.physical_activity_minutes is not None:
+            metrics.append(f"Exercise: {day.physical_activity_minutes} mins")
+        if day.mood_score is not None:
+            metrics.append(f"Mood: {day.mood_score}/10")
+        if day.fatigue_level is not None:
+            metrics.append(f"Fatigue: {day.fatigue_level}/10")
+        if day.academic_pressure_index is not None:
+            metrics.append(f"Academic Pressure Index: {day.academic_pressure_index:.2f}")
+        if day.recovery_index is not None:
+            metrics.append(f"Recovery Index: {day.recovery_index:.2f}")
+        if day.digital_pressure_index is not None:
+            metrics.append(f"Digital Pressure Index: {day.digital_pressure_index:.2f}")
+        if day.stress_level is not None:
+            metrics.append(f"Predicted Stress: {day.stress_level}")
+        
+        day_info += ", ".join(metrics)
+        history_summary.append(day_info)
+        
+    history_context = "\n".join(history_summary)
+
+    # 2. System instruction and prompt
+    system_instruction = (
+        "Anda adalah asisten AI psikolog dan coach gaya hidup mahasiswa yang empati, profesional, dan solutif.\n"
+        "Tugas Anda adalah menganalisis data aktivitas mingguan mahasiswa untuk mendeteksi tren stres, kesehatan, dan produktivitas mereka.\n\n"
+        "ATURAN OUTPUT:\n"
+        "1. Output WAJIB berupa objek JSON valid dengan struktur persis seperti berikut:\n"
+        "{\n"
+        "  \"insight\": \"1 kalimat analisis mendalam tentang tren stres dan faktor dominan mahasiswa selama seminggu ini.\",\n"
+        "  \"recommendations\": [\n"
+        "    {\n"
+        "      \"category\": \"kategori rekomendasi (pilih salah satu dari: academic, health, lifestyle, sleep, social, mindfulness)\",\n"
+        "      \"priority_level\": \"tingkat prioritas (pilih salah satu dari: low, medium, high, urgent)\",\n"
+        "      \"title\": \"Judul Rekomendasi 1 (Singkat, Tindakan)\",\n"
+        "      \"text\": \"Tindakan konkret, praktis, dan personal untuk dilakukan.\"\n"
+        "    },\n"
+        "    {\n"
+        "      \"category\": \"kategori rekomendasi (pilih salah satu dari: academic, health, lifestyle, sleep, social, mindfulness)\",\n"
+        "      \"priority_level\": \"tingkat prioritas (pilih salah satu dari: low, medium, high, urgent)\",\n"
+        "      \"title\": \"Judul Rekomendasi 2 (Singkat, Tindakan)\",\n"
+        "      \"text\": \"Tindakan konkret lainnya yang berbeda dari rekomendasi 1.\"\n"
+        "    },\n"
+        "    {\n"
+        "      \"category\": \"kategori rekomendasi (pilih salah satu dari: academic, health, lifestyle, sleep, social, mindfulness)\",\n"
+        "      \"priority_level\": \"tingkat prioritas (pilih salah satu dari: low, medium, high, urgent)\",\n"
+        "      \"title\": \"Judul Rekomendasi 3 (Singkat, Tindakan)\",\n"
+        "      \"text\": \"Tindakan konkret lainnya yang berbeda dari rekomendasi 1 & 2.\"\n"
+        "    }\n"
+        "  ]\n"
+        "}\n\n"
+        "2. Jumlah INSIGHT harus TEPAT 1.\n"
+        "3. Jumlah REKOMENDASI harus TEPAT 3.\n"
+        "4. Gunakan Bahasa Indonesia yang ramah, memotivasi, dan tidak kaku (gunakan sebutan 'kamu').\n"
+        "5. HINDARI REDUNDANSI/PENGULANGAN antara isi insight dengan ketiga rekomendasi. Setiap rekomendasi harus membahas aspek yang berbeda.\n"
+        "6. JANGAN berikan penjelasan teks tambahan di luar JSON tersebut."
+    )
+
+    user_prompt = (
+        f"Analisis data historis seminggu berikut untuk User ID: {req.user_id}.\n\n"
+        f"Prediksi Tingkat Stres Mingguan: {req.weekly_stress_prediction}\n\n"
+        f"Data Historis Harian:\n"
+        f"{history_context}\n\n"
+        "Ingat, kembalikan respon dalam format JSON sesuai spesifikasi di instruksi sistem."
+    )
+
+    # 3. Call Groq API
+    try:
+        response = groq_client.chat.completions.create(
+            model="openai/gpt-oss-20b",
+            messages=[
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": user_prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.7,
+            max_tokens=1000
+        )
+        
+        raw_content = response.choices[0].message.content
+        result_json = json.loads(raw_content)
+        
+        if "insight" not in result_json or "recommendations" not in result_json:
+            raise ValueError("Response JSON missing required keys.")
+            
+        insight_raw = result_json["insight"]
+        if isinstance(insight_raw, dict):
+            insight_text = insight_raw.get("text", insight_raw.get("title", str(insight_raw)))
+        else:
+            insight_text = str(insight_raw)
+            
+        recommendations_data = result_json["recommendations"]
+        
+        recommendations_items = []
+        valid_categories = {"academic", "health", "lifestyle", "sleep", "social", "mindfulness"}
+        valid_priorities = {"low", "medium", "high", "urgent"}
+        
+        for item in recommendations_data[:3]:
+            cat = str(item.get("category", "lifestyle")).lower().strip()
+            if cat not in valid_categories:
+                cat = "lifestyle"
+                
+            priority = str(item.get("priority_level", "medium")).lower().strip()
+            if priority not in valid_priorities:
+                priority = "medium"
+
+            recommendations_items.append(RAGTextItem(
+                category=cat,
+                priority_level=priority,
+                title=item.get("title", "Rekomendasi Tindakan"),
+                text=item.get("text", "Lakukan aktivitas yang seimbang.")
+            ))
+            
+        while len(recommendations_items) < 3:
+            recommendations_items.append(RAGTextItem(
+                category="lifestyle",
+                priority_level="medium",
+                title="Jaga Keseimbangan",
+                text="Luangkan waktu 15 menit untuk relaksasi atau aktivitas tanpa layar."
+            ))
+            
+        return WeeklyRAGResponse(
+            success=True,
+            user_id=req.user_id,
+            insight=insight_text,
+            recommendations=recommendations_items
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Gagal menghasilkan RAG AI insight/rekomendasi: {str(e)}"
+        )

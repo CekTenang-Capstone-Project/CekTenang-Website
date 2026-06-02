@@ -1135,6 +1135,636 @@
               ]
             }
           }
+        },
+        {
+          "name": "Submit Activity Prev Week Day 1 (Low Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_prev_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_prev_id_1\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{prev_date_day_1}}\",\n  \"sleepHours\": 8.5,\n  \"studyHours\": 2.0,\n  \"screenTimeHours\": 2.0,\n  \"socialMediaHours\": 0.5,\n  \"physicalActivityMinutes\": 60,\n  \"moodScore\": 9,\n  \"fatigueLevel\": 1,\n  \"assignmentLoad\": 1,\n  \"deadlinePressure\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Prev Week Day 2 (Low Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_prev_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_prev_id_2\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{prev_date_day_2}}\",\n  \"sleepHours\": 8.0,\n  \"studyHours\": 3.0,\n  \"screenTimeHours\": 2.0,\n  \"socialMediaHours\": 0.5,\n  \"physicalActivityMinutes\": 45,\n  \"moodScore\": 8,\n  \"fatigueLevel\": 2,\n  \"assignmentLoad\": 1,\n  \"deadlinePressure\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Prev Week Day 3 (Low Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_prev_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_prev_id_3\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{prev_date_day_3}}\",\n  \"sleepHours\": 8.5,\n  \"studyHours\": 1.5,\n  \"screenTimeHours\": 1.5,\n  \"socialMediaHours\": 0.5,\n  \"physicalActivityMinutes\": 60,\n  \"moodScore\": 9,\n  \"fatigueLevel\": 1,\n  \"assignmentLoad\": 0,\n  \"deadlinePressure\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Prev Week Day 4 (Low Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_prev_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_prev_id_4\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{prev_date_day_4}}\",\n  \"sleepHours\": 9.0,\n  \"studyHours\": 2.0,\n  \"screenTimeHours\": 2.0,\n  \"socialMediaHours\": 0.5,\n  \"physicalActivityMinutes\": 50,\n  \"moodScore\": 9,\n  \"fatigueLevel\": 1,\n  \"assignmentLoad\": 1,\n  \"deadlinePressure\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Prev Week Day 5 (Low Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_prev_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_prev_id_5\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{prev_date_day_5}}\",\n  \"sleepHours\": 8.5,\n  \"studyHours\": 2.0,\n  \"screenTimeHours\": 1.5,\n  \"socialMediaHours\": 0.5,\n  \"physicalActivityMinutes\": 60,\n  \"moodScore\": 9,\n  \"fatigueLevel\": 2,\n  \"assignmentLoad\": 1,\n  \"deadlinePressure\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Prev Week Day 6 (Low Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_prev_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_prev_id_6\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{prev_date_day_6}}\",\n  \"sleepHours\": 8.0,\n  \"studyHours\": 1.0,\n  \"screenTimeHours\": 2.0,\n  \"socialMediaHours\": 0.5,\n  \"physicalActivityMinutes\": 45,\n  \"moodScore\": 8,\n  \"fatigueLevel\": 2,\n  \"assignmentLoad\": 0,\n  \"deadlinePressure\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Prev Week Day 7 (Low Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_prev_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_prev_id_7\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{prev_date_day_7}}\",\n  \"sleepHours\": 8.5,\n  \"studyHours\": 2.0,\n  \"screenTimeHours\": 1.5,\n  \"socialMediaHours\": 0.5,\n  \"physicalActivityMinutes\": 60,\n  \"moodScore\": 9,\n  \"fatigueLevel\": 1,\n  \"assignmentLoad\": 0,\n  \"deadlinePressure\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Two Weeks Ago Day 1 (High Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_two_weeks_ago_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_two_weeks_ago_id_1\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{two_weeks_ago_date_day_1}}\",\n  \"sleepHours\": 4.5,\n  \"studyHours\": 9.0,\n  \"screenTimeHours\": 7.5,\n  \"socialMediaHours\": 3.0,\n  \"physicalActivityMinutes\": 5,\n  \"moodScore\": 3,\n  \"fatigueLevel\": 8,\n  \"assignmentLoad\": 8,\n  \"deadlinePressure\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Two Weeks Ago Day 2 (High Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_two_weeks_ago_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_two_weeks_ago_id_2\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{two_weeks_ago_date_day_2}}\",\n  \"sleepHours\": 4.0,\n  \"studyHours\": 10.0,\n  \"screenTimeHours\": 8.0,\n  \"socialMediaHours\": 4.0,\n  \"physicalActivityMinutes\": 0,\n  \"moodScore\": 2,\n  \"fatigueLevel\": 9,\n  \"assignmentLoad\": 9,\n  \"deadlinePressure\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Two Weeks Ago Day 3 (High Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_two_weeks_ago_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_two_weeks_ago_id_3\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{two_weeks_ago_date_day_3}}\",\n  \"sleepHours\": 5.0,\n  \"studyHours\": 8.5,\n  \"screenTimeHours\": 6.5,\n  \"socialMediaHours\": 3.0,\n  \"physicalActivityMinutes\": 10,\n  \"moodScore\": 4,\n  \"fatigueLevel\": 7,\n  \"assignmentLoad\": 8,\n  \"deadlinePressure\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Two Weeks Ago Day 4 (High Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_two_weeks_ago_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_two_weeks_ago_id_4\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{two_weeks_ago_date_day_4}}\",\n  \"sleepHours\": 3.5,\n  \"studyHours\": 9.5,\n  \"screenTimeHours\": 8.0,\n  \"socialMediaHours\": 4.5,\n  \"physicalActivityMinutes\": 0,\n  \"moodScore\": 2,\n  \"fatigueLevel\": 9,\n  \"assignmentLoad\": 9,\n  \"deadlinePressure\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Two Weeks Ago Day 5 (High Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_two_weeks_ago_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_two_weeks_ago_id_5\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{two_weeks_ago_date_day_5}}\",\n  \"sleepHours\": 4.5,\n  \"studyHours\": 9.0,\n  \"screenTimeHours\": 7.0,\n  \"socialMediaHours\": 3.5,\n  \"physicalActivityMinutes\": 5,\n  \"moodScore\": 3,\n  \"fatigueLevel\": 8,\n  \"assignmentLoad\": 9,\n  \"deadlinePressure\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Two Weeks Ago Day 6 (High Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_two_weeks_ago_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_two_weeks_ago_id_6\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{two_weeks_ago_date_day_6}}\",\n  \"sleepHours\": 4.0,\n  \"studyHours\": 10.0,\n  \"screenTimeHours\": 8.5,\n  \"socialMediaHours\": 4.0,\n  \"physicalActivityMinutes\": 0,\n  \"moodScore\": 2,\n  \"fatigueLevel\": 9,\n  \"assignmentLoad\": 10,\n  \"deadlinePressure\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Activity Two Weeks Ago Day 7 (High Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Extract activity_two_weeks_ago_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.activity && jsonData.data.activity.id) {",
+                  "        pm.environment.set(\"activity_two_weeks_ago_id_7\", jsonData.data.activity.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityDate\": \"{{two_weeks_ago_date_day_7}}\",\n  \"sleepHours\": 5.0,\n  \"studyHours\": 7.5,\n  \"screenTimeHours\": 6.0,\n  \"socialMediaHours\": 2.5,\n  \"physicalActivityMinutes\": 15,\n  \"moodScore\": 4,\n  \"fatigueLevel\": 7,\n  \"assignmentLoad\": 7,\n  \"deadlinePressure\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
         }
       ],
       "event": [
@@ -1156,6 +1786,24 @@
               "    const day = new Date(monday);",
               "    day.setDate(monday.getDate() + i);",
               "    pm.environment.set(`date_day_${i + 1}`, formatDate(day));",
+              "}",
+              "",
+              "// Previous week dates",
+              "const prevMonday = new Date(monday);",
+              "prevMonday.setDate(monday.getDate() - 7);",
+              "for (let i = 0; i < 7; i++) {",
+              "    const day = new Date(prevMonday);",
+              "    day.setDate(prevMonday.getDate() + i);",
+              "    pm.environment.set(`prev_date_day_${i + 1}`, formatDate(day));",
+              "}",
+              "",
+              "// Two weeks ago dates",
+              "const twoWeeksAgoMonday = new Date(monday);",
+              "twoWeeksAgoMonday.setDate(monday.getDate() - 14);",
+              "for (let i = 0; i < 7; i++) {",
+              "    const day = new Date(twoWeeksAgoMonday);",
+              "    day.setDate(twoWeeksAgoMonday.getDate() + i);",
+              "    pm.environment.set(`two_weeks_ago_date_day_${i + 1}`, formatDate(day));",
               "}"
             ]
           }
@@ -1268,7 +1916,7 @@
       "name": "Weekly Summaries",
       "item": [
         {
-          "name": "Generate Weekly Summary + Dummy Insight & Recommendation",
+          "name": "Generate Weekly Summary + AI Insight & Recommendations",
           "event": [
             {
               "listen": "test",
@@ -1289,7 +1937,7 @@
                   "    if (s.id) { pm.environment.set('summary_id', s.id); }",
                   "});",
                   "",
-                  "pm.test(\"Dummy insight returned from ML service\", function () {",
+                  "pm.test(\"AI insight returned from ML service\", function () {",
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData.data).to.have.property('insight');",
                   "    if (jsonData.data.insight) {",
@@ -1299,7 +1947,7 @@
                   "    }",
                   "});",
                   "",
-                  "pm.test(\"Dummy recommendation returned from ML service\", function () {",
+                  "pm.test(\"AI recommendation returned from ML service\", function () {",
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData.data).to.have.property('recommendation');",
                   "    if (jsonData.data.recommendation) {",
@@ -1307,6 +1955,18 @@
                   "        pm.expect(jsonData.data.recommendation.recommendation_text).to.not.be.empty;",
                   "        pm.expect(jsonData.data.recommendation.summary_id).to.exist;",
                   "    }",
+                  "});",
+                  "",
+                  "pm.test(\"AI recommendations array returned from ML service\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('recommendations');",
+                  "    pm.expect(jsonData.data.recommendations).to.be.an('array');",
+                  "    pm.expect(jsonData.data.recommendations.length).to.be.at.least(1);",
+                  "    const firstRec = jsonData.data.recommendations[0];",
+                  "    pm.expect(firstRec.category).to.be.a('string');",
+                  "    pm.expect(firstRec.priority_level).to.be.a('string');",
+                  "    pm.expect(firstRec.title).to.be.a('string');",
+                  "    pm.expect(firstRec.recommendation_text).to.be.a('string');",
                   "});",
                   "",
                   "pm.test(\"mlAvailable flag is present\", function () {",
@@ -1329,6 +1989,115 @@
               "path": [
                 "weekly-summaries",
                 "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Weekly Summary + AI Insight & Recommendations (Previous Week - Low Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Summary is returned with low stress level\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.summary).to.exist;",
+                  "    const s = jsonData.data.summary;",
+                  "    pm.expect(s.dominant_stress_level).to.eql('low');",
+                  "    if (s.id) { pm.environment.set('summary_prev_id', s.id); }",
+                  "});",
+                  "",
+                  "pm.test(\"AI insight and recommendations array returned for prev week\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('insight');",
+                  "    pm.expect(jsonData.data.insight.insight_text).to.be.a('string');",
+                  "    pm.expect(jsonData.data).to.have.property('recommendations');",
+                  "    pm.expect(jsonData.data.recommendations).to.be.an('array');",
+                  "    pm.expect(jsonData.data.recommendations.length).to.be.at.least(1);",
+                  "    pm.expect(['low', 'medium', 'high', 'urgent']).to.include(jsonData.data.recommendations[0].priority_level);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/weekly-summaries/generate?date={{prev_date_day_1}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "weekly-summaries",
+                "generate"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{prev_date_day_1}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Weekly Summary + AI Insight & Recommendations (Two Weeks Ago - High Stress Pattern)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Summary is returned with high stress level\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.summary).to.exist;",
+                  "    const s = jsonData.data.summary;",
+                  "    pm.expect(s.dominant_stress_level).to.eql('high');",
+                  "    if (s.id) { pm.environment.set('summary_two_weeks_ago_id', s.id); }",
+                  "});",
+                  "",
+                  "pm.test(\"AI insight and recommendations array returned for high stress week\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('insight');",
+                  "    pm.expect(jsonData.data.insight.insight_text).to.be.a('string');",
+                  "    pm.expect(jsonData.data).to.have.property('recommendations');",
+                  "    pm.expect(jsonData.data.recommendations).to.be.an('array');",
+                  "    pm.expect(jsonData.data.recommendations.length).to.be.at.least(1);",
+                  "    const hasUrgentOrHigh = jsonData.data.recommendations.some(r => ['high', 'urgent'].includes(r.priority_level.toLowerCase()));",
+                  "    pm.expect(hasUrgentOrHigh).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/weekly-summaries/generate?date={{two_weeks_ago_date_day_1}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "weekly-summaries",
+                "generate"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{two_weeks_ago_date_day_1}}"
+                }
               ]
             }
           }
@@ -1952,6 +2721,426 @@
               "path": [
                 "activities",
                 "{{activity_id_7}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Prev Week Day 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_prev_id_1}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_prev_id_1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Prev Week Day 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_prev_id_2}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_prev_id_2}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Prev Week Day 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_prev_id_3}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_prev_id_3}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Prev Week Day 4",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_prev_id_4}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_prev_id_4}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Prev Week Day 5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_prev_id_5}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_prev_id_5}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Prev Week Day 6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_prev_id_6}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_prev_id_6}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Prev Week Day 7",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_prev_id_7}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_prev_id_7}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Two Weeks Ago Day 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_two_weeks_ago_id_1}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_two_weeks_ago_id_1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Two Weeks Ago Day 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_two_weeks_ago_id_2}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_two_weeks_ago_id_2}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Two Weeks Ago Day 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_two_weeks_ago_id_3}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_two_weeks_ago_id_3}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Two Weeks Ago Day 4",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_two_weeks_ago_id_4}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_two_weeks_ago_id_4}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Two Weeks Ago Day 5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_two_weeks_ago_id_5}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_two_weeks_ago_id_5}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Two Weeks Ago Day 6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_two_weeks_ago_id_6}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_two_weeks_ago_id_6}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Activity Two Weeks Ago Day 7",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/activities/{{activity_two_weeks_ago_id_7}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "activities",
+                "{{activity_two_weeks_ago_id_7}}"
               ]
             }
           }

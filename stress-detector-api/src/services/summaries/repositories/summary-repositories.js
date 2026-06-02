@@ -252,6 +252,35 @@ class WeeklySummaryRepositories {
     if (diff >= 0.5) return 'worsening';
     return 'stable';
   }
+
+  /**
+   * Retrieve joined daily activities and stress predictions for a given user in a week.
+   */
+  async getWeeklyHistory(userId, weekStart, weekEnd) {
+    const query = {
+      text: `SELECT
+               da.activity_date,
+               da.sleep_hours,
+               da.physical_activity_minutes,
+               da.study_hours,
+               da.screen_time_hours,
+               da.social_media_hours,
+               da.mood_score,
+               da.fatigue_level,
+               da.assignment_load,
+               da.deadline_pressure,
+               sp.stress_level,
+               sp.stress_score
+             FROM daily_activities da
+             LEFT JOIN stress_predictions sp ON da.id = sp.activity_id
+             WHERE da.user_id = $1
+               AND da.activity_date BETWEEN $2 AND $3
+             ORDER BY da.activity_date ASC`,
+      values: [userId, weekStart, weekEnd],
+    };
+    const result = await this.pool.query(query);
+    return result.rows;
+  }
 }
 
 export default new WeeklySummaryRepositories();

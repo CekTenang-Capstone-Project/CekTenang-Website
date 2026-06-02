@@ -23,6 +23,18 @@ export const up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: false,
     },
+    category: {
+      type: 'VARCHAR(50)',
+      notNull: true,
+    },
+    priority_level: {
+      type: 'VARCHAR(50)',
+      notNull: true,
+    },
+    title: {
+      type: 'VARCHAR(255)',
+      notNull: true,
+    },
     recommendation_text: {
       type: 'TEXT',
       notNull: true,

@@ -99,6 +99,8 @@ components:
           type: string
           enum: [daily, weekly]
         category: { type: string }
+        priority_level: { type: string }
+        title: { type: string }
         recommendation_text: { type: string }
         is_read: { type: boolean }
         created_at: { type: string, format: date-time }
@@ -635,6 +637,10 @@ paths:
                             $ref: '#/components/schemas/Insight'
                           recommendation:
                             $ref: '#/components/schemas/Recommendation'
+                          recommendations:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Recommendation'
                           mlAvailable: { type: boolean }
         '400':
           description: No activity data found for this week

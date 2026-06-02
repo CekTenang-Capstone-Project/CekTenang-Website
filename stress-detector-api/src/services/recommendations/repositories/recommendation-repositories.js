@@ -9,6 +9,9 @@ class RecommendationRepositories {
   async saveRecommendation({
     userId,
     summaryId = null,
+    category,
+    priorityLevel,
+    title,
     recommendationText,
   }) {
     const id = nanoid(16);
@@ -16,11 +19,11 @@ class RecommendationRepositories {
 
     const query = {
       text: `INSERT INTO recommendations
-               (id, user_id, summary_id,
+               (id, user_id, summary_id, category, priority_level, title,
                 recommendation_text, created_at)
-             VALUES ($1, $2, $3, $4, $5)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
              RETURNING *`,
-      values: [id, userId, summaryId, recommendationText, createdAt],
+      values: [id, userId, summaryId, category, priorityLevel, title, recommendationText, createdAt],
     };
 
     const result = await this.pool.query(query);
@@ -71,6 +74,17 @@ class RecommendationRepositories {
     };
     const result = await this.pool.query(query);
     return result.rows[0]?.count ?? 0;
+  }
+
+  async getRecommendationsBySummary(summaryId) {
+    const query = {
+      text: `SELECT * FROM recommendations
+             WHERE summary_id = $1
+             ORDER BY created_at ASC`,
+      values: [summaryId],
+    };
+    const result = await this.pool.query(query);
+    return result.rows;
   }
 }
 

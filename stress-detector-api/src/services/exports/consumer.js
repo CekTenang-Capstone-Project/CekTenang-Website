@@ -73,8 +73,8 @@ class Consumer {
       `[Info] Processing export task for User ID: ${userId}, Email: ${targetEmail}, Type: ${type}`,
     );
 
-    // Jeda 2.5 detik untuk menghindari rate limit 'Too many emails per second' pada Mailtrap Free Tier
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+    // Jeda 3.5 detik untuk menghindari rate limit 'Too many emails per second' pada Mailtrap Free Tier
+    await new Promise((resolve) => setTimeout(resolve, 3500));
 
     const userResult = await UserRepositories.getUserById(userId);
     const user = userResult.data;
@@ -105,8 +105,10 @@ class Consumer {
     } else if (type === 'weekly') {
       const summary = await WeeklySummaryRepositories.getLatestSummary(userId);
       const insight = await InsightRepositories.getLatestInsight(userId);
-      const recommendation =
-        await RecommendationRepositories.getLatestRecommendation(userId);
+      let recommendations = [];
+      if (summary) {
+        recommendations = await RecommendationRepositories.getRecommendationsBySummary(summary.id);
+      }
 
       let htmlContent;
       if (!summary) {
@@ -116,9 +118,10 @@ class Consumer {
           userName,
           summary,
           insight,
-          recommendation,
+          recommendations,
         );
       }
+
 
       await this.transporter.sendMail({
         from: '"CekTenang Team" <no-reply@cektenang.id>',
@@ -222,34 +225,16 @@ class Consumer {
     `;
   }
 
-  getWeeklyTemplate(userName, summary, insight, recommendation) {
-    const avgStress = parseFloat(summary.average_stress_level).toFixed(1);
-    const avgSleep = parseFloat(summary.average_sleep_hours).toFixed(1);
-    const avgScreen = parseFloat(summary.average_screen_time_hours).toFixed(1);
-    const trend = summary.stress_trend || 'stable';
-
-    const startDateStr = new Date(summary.week_start).toLocaleDateString(
+  getWeeklyTemplate(userName, summary, insight, recommendations) {
+    const startDateStr = new Date(summary.period_start).toLocaleDateString(
       'id-ID',
       { month: 'short', day: 'numeric' },
     );
-    const endDateStr = new Date(summary.week_end).toLocaleDateString('id-ID', {
+    const endDateStr = new Date(summary.period_end).toLocaleDateString('id-ID', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
-
-    let trendIcon = '➡️';
-    let trendText = 'Stabil';
-    let trendColor = '#6b7280';
-    if (trend === 'improving') {
-      trendIcon = '📉';
-      trendText = 'Membaik (Menurun)';
-      trendColor = '#10b981';
-    } else if (trend === 'worsening') {
-      trendIcon = '📈';
-      trendText = 'Memburuk (Meningkat)';
-      trendColor = '#ef4444';
-    }
 
     const insightHtml = insight
       ? `
@@ -260,14 +245,14 @@ class Consumer {
     `
       : '';
 
-    const recommendationHtml = recommendation
-      ? `
-      <div style="background-color: #fcf8f2; border: 1px solid #f3e8d3; padding: 20px; border-radius: 12px; margin-bottom: 32px;">
-        <h3 style="color: #b45309; margin: 0 0 8px 0; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">💡 Rekomendasi Terapi</h3>
-        <span style="display: inline-block; background-color: #fef3c7; color: #b45309; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-bottom: 12px;">Kategori: ${recommendation.category || 'Umum'}</span>
-        <p style="color: #451a03; font-size: 14.5px; line-height: 1.6; margin: 0;">${recommendation.recommendation_text}</p>
+    const recommendationHtml = recommendations && recommendations.length > 0
+      ? recommendations.map((rec) => `
+      <div style="background-color: #fcf8f2; border: 1px solid #f3e8d3; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+        <h3 style="color: #b45309; margin: 0 0 8px 0; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">💡 Rekomendasi Terapi: ${rec.title || 'Umum'}</h3>
+        <span style="display: inline-block; background-color: #fef3c7; color: #b45309; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-bottom: 12px;">Kategori: ${rec.category || 'Umum'} | Prioritas: ${rec.priority_level || 'Medium'}</span>
+        <p style="color: #451a03; font-size: 14.5px; line-height: 1.6; margin: 0;">${rec.recommendation_text}</p>
       </div>
-    `
+    `).join('')
       : '';
 
     return `
@@ -293,39 +278,6 @@ class Consumer {
             <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-top: 0;">Halo, <strong>${userName}</strong>!</p>
             <p style="color: #4b5563; font-size: 15px; line-height: 1.6;">Kerja bagus telah rutin memantau kondisi emosional Anda minggu ini! AI CekTenang telah mengompilasi seluruh data harian Anda untuk memberikan ringkasan holistik serta rekomendasi personal:</p>
             
-            <!-- Summary Dashboard Stats (Grid equivalent) -->
-            <div style="margin: 32px 0; border-collapse: collapse; width: 100%;">
-              <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="width: 50%; padding: 8px; box-sizing: border-box;">
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-                      <span style="font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: bold; display: block; margin-bottom: 4px;">Rerata Stres</span>
-                      <strong style="font-size: 24px; color: #111827;">${avgStress}</strong> <span style="font-size: 12px; color: #6b7280;">/ 10</span>
-                    </div>
-                  </td>
-                  <td style="width: 50%; padding: 8px; box-sizing: border-box;">
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-                      <span style="font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: bold; display: block; margin-bottom: 4px;">Tren Stres</span>
-                      <strong style="font-size: 15px; color: ${trendColor};">${trendIcon} ${trendText}</strong>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="width: 50%; padding: 8px; box-sizing: border-box;">
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-                      <span style="font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: bold; display: block; margin-bottom: 4px;">Tidur Harian</span>
-                      <strong style="font-size: 20px; color: #111827;">${avgSleep}</strong> <span style="font-size: 12px; color: #6b7280;">Jam</span>
-                    </div>
-                  </td>
-                  <td style="width: 50%; padding: 8px; box-sizing: border-box;">
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-                      <span style="font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: bold; display: block; margin-bottom: 4px;">Waktu Layar</span>
-                      <strong style="font-size: 20px; color: #111827;">${avgScreen}</strong> <span style="font-size: 12px; color: #6b7280;">Jam</span>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </div>
 
             <!-- Insight Box -->
             ${insightHtml}
