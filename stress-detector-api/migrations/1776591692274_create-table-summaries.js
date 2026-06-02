@@ -10,6 +10,7 @@ export const shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 export const up = (pgm) => {
+  pgm.createType('summary_status', ['pending', 'generated']);
   pgm.createTable('summaries', {
     id: {
       type: 'VARCHAR(50)',
@@ -17,12 +18,6 @@ export const up = (pgm) => {
     },
     user_id: {
       type: 'VARCHAR(50)',
-      notNull: true,
-      references: 'users(id)',
-      onDelete: 'CASCADE',
-    },
-    period_type: {
-      type: 'VARCHAR(20)',
       notNull: true,
     },
     period_start: {
@@ -96,13 +91,8 @@ export const up = (pgm) => {
       type: 'VARCHAR(20)',
       notNull: true,
     },
-    main_trigger: {
-      type: 'VARCHAR(100)',
-      notNull: true,
-    },
     summary_status: {
-      type: 'enum',
-      values: ['pending', 'generated'],
+      type: 'summary_status',
       notNull: true,
       default: 'pending',
     },
@@ -130,4 +120,5 @@ export const up = (pgm) => {
  */
 export const down = (pgm) => {
   pgm.dropTable('summaries');
+  pgm.dropType('summary_status');
 };

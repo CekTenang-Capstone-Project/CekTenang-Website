@@ -104,17 +104,9 @@ export const generateWeeklySummary = async (req, res, next) => {
     (level) => (level || '').toLowerCase() === 'high',
   ).length;
 
-  const triggers = [];
-  if ((activityStats.average_assignment_load ?? 0) >= 5) triggers.push('Beban Tugas');
-  if ((activityStats.average_deadline_pressure ?? 0) >= 5) triggers.push('Tekanan Deadline');
-  if ((activityStats.average_fatigue_level ?? 0) >= 5) triggers.push('Kelelahan');
-  if ((activityStats.average_screen_time_hours ?? 0) >= 6) triggers.push('Screen Time Berlebih');
-  const mainTrigger = triggers[0] || 'Beban Tugas';
-
   // 5. Save weekly summary
   const summary = await WeeklySummaryRepositories.saveSummary({
     userId,
-    periodType: 'weekly',
     periodStart: weekStartStr,
     periodEnd: weekEndStr,
     daysCount: activityStats.total_days,
@@ -133,7 +125,6 @@ export const generateWeeklySummary = async (req, res, next) => {
     highStressDays,
     maxStressScore: predictionStats?.max_stress_score ?? 0,
     stressTrend,
-    mainTrigger,
     summaryStatus: 'generated',
   });
 
@@ -191,7 +182,6 @@ export const generateWeeklySummary = async (req, res, next) => {
     insight = await InsightRepositories.saveInsight({
       userId,
       summaryId: summary.id,
-      periodType: 'weekly',
       insightText: mlInsight.insight_text,
     });
   }
@@ -202,8 +192,6 @@ export const generateWeeklySummary = async (req, res, next) => {
     recommendation = await RecommendationRepositories.saveRecommendation({
       userId,
       summaryId: summary.id,
-      periodType: 'weekly',
-      category: firstRec.category || null,
       recommendationText: firstRec.recommendation_text,
     });
   }

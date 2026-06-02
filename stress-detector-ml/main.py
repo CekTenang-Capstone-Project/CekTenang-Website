@@ -4,7 +4,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Hide TensorFlow warnings in terminal
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 import pickle
 import pandas as pd
@@ -13,6 +13,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 import joblib
+
 
 # ============================================================
 # Custom TensorFlow Model Layers & Loss Classes
@@ -126,6 +127,7 @@ try:
         scaler = pickle.load(f)
     with open(os.path.join(MODEL_DIR, 'label_encoder.pkl'), 'rb') as f:
         label_encoder = pickle.load(f)
+    label_encoder.classes_ = np.array(['Low', 'Medium', 'High'])
         
     model = keras.models.load_model(
         os.path.join(MODEL_DIR, 'stress_classifier.keras'),
@@ -136,10 +138,10 @@ try:
     )
     # Features must be in this exact order
     FEATURE_COLS = [
-        'sleep_hours', 'study_hours', 'screen_time_hours', 'social_media_hours',
-        'physical_activity_minutes', 'caffeine_intake_mg', 'mood_score',
-        'fatigue_level', 'assignment_load', 'deadline_pressure',
-        'social_interaction_score', 'financial_worry_score', 'health_condition_score'
+        'sleep_hours', 'physical_activity_minutes', 'study_hours', 'screen_time_hours',
+        'assignment_load', 'deadline_pressure', 'fatigue_level', 'mood_score',
+        'social_media_ratio', 'study_screen_balance', 'academic_pressure_index',
+        'recovery_index', 'digital_pressure_index'
     ]
     print("[Predictor] Model loaded successfully!")
 except Exception as e:
@@ -171,45 +173,48 @@ except Exception as e:
 # Predict Schemas
 class UserInput(BaseModel):
     sleep_hours: float
+    physical_activity_minutes: int
     study_hours: float
     screen_time_hours: float
     social_media_hours: float
-    physical_activity_minutes: int
-    caffeine_intake_mg: int
-    mood_score: int
-    fatigue_level: int
     assignment_load: int
     deadline_pressure: int
-    social_interaction_score: int
-    financial_worry_score: int
-    health_condition_score: int
+    fatigue_level: int
+    mood_score: int
 
 # Recommendation / Insight Shared Schemas
 class InputFeatures(BaseModel):
     sleep_hours: Optional[float] = None
-    mood_score: Optional[float] = None
-    physical_activity: Optional[float] = None
-    screen_time: Optional[float] = None
+    physical_activity_minutes: Optional[float] = None
     study_hours: Optional[float] = None
-    fatigue_score: Optional[float] = None
-    financial_stress: Optional[float] = None
-    health_score: Optional[float] = None
-    caffeine_intake: Optional[float] = None
+    screen_time_hours: Optional[float] = None
+    assignment_load: Optional[float] = None
+    deadline_pressure: Optional[float] = None
+    fatigue_level: Optional[float] = None
+    mood_score: Optional[float] = None
+    social_media_ratio: Optional[float] = None
+    study_screen_balance: Optional[float] = None
+    academic_pressure_index: Optional[float] = None
+    recovery_index: Optional[float] = None
+    digital_pressure_index: Optional[float] = None
+    financial_worry_score: Optional[float] = None
+    health_condition_score: Optional[float] = None
+    caffeine_intake_mg: Optional[float] = None
 
 # Recommendation Schemas
 class RecommendationRequest(BaseModel):
-    user_id: str
-    stress_prediction_id: str
+    user_id: Union[str, int]
+    stress_prediction_id: Union[str, int]
     stress_level: str                   # "low" | "medium" | "high"
     input_features: InputFeatures
     period_type: str = "daily"          # "daily" | "weekly"
-    weekly_summary_id: Optional[str] = None
+    weekly_summary_id: Optional[Union[str, int]] = None
     max_recommendations: int = 3
 
 class RecommendationItem(BaseModel):
-    user_id: str
-    stress_prediction_id: str
-    weekly_summary_id: Optional[str]
+    user_id: Union[str, int]
+    stress_prediction_id: Union[str, int]
+    weekly_summary_id: Optional[Union[str, int]]
     period_type: str
     category: str
     title: str
@@ -224,19 +229,19 @@ class RecommendationResponse(BaseModel):
 
 # Insight Schemas
 class InsightRequest(BaseModel):
-    user_id: str
-    stress_prediction_id: str
+    user_id: Union[str, int]
+    stress_prediction_id: Union[str, int]
     stress_level: str                       # "low" | "medium" | "high"
     input_features: InputFeatures
     period_type: str = "daily"             # "daily" | "weekly"
-    weekly_summary_id: Optional[str] = None
+    weekly_summary_id: Optional[Union[str, int]] = None
     weekly_stress_levels: Optional[List[str]] = None  # Required if period_type is "weekly"
 
 class InsightResponse(BaseModel):
     success: bool
-    user_id: str
-    stress_prediction_id: str
-    weekly_summary_id: Optional[str]
+    user_id: Union[str, int]
+    stress_prediction_id: Union[str, int]
+    weekly_summary_id: Optional[Union[str, int]]
     period_type: str
     insight_text: str
     created_at: str
@@ -250,30 +255,59 @@ def detect_categories(feats: dict, stress_level: str, period_type: str) -> list:
     sl = stress_level.lower()
 
     if period_type == "weekly":
-        if sl in ("medium", "high"):
-            relevant.append("weekly_target")
+        relevant.append("weekly_target")
         return relevant
 
     if sl == "low":
         return ["maintenance"]
 
-    if feats.get("study_hours", 0) > 7 or sl == "high":
+    # 1. Workload
+    study_hours = feats.get("study_hours")
+    academic_pressure = feats.get("academic_pressure_index")
+    if (study_hours is not None and study_hours > 7) or (academic_pressure is not None and academic_pressure >= 0.6) or sl == "high":
         relevant.append("workload")
-    if feats.get("fatigue_score", 0) >= 7:
+
+    # 2. Recovery
+    fatigue = feats.get("fatigue_level")
+    recovery = feats.get("recovery_index")
+    if (fatigue is not None and fatigue >= 7) or (recovery is not None and recovery < 0.5):
         relevant.append("recovery")
-    if feats.get("mood_score") is not None and feats["mood_score"] < 5:
+
+    # 3. Mood regulation
+    mood = feats.get("mood_score")
+    if mood is not None and mood < 5:
         relevant.append("mood_regulation")
-    if feats.get("sleep_hours") is not None and feats["sleep_hours"] < 7:
+
+    # 4. Sleep
+    sleep = feats.get("sleep_hours")
+    if sleep is not None and sleep < 7:
         relevant.append("sleep")
-    if feats.get("physical_activity") is not None and feats["physical_activity"] < 20:
+
+    # 5. Physical activity
+    phys = feats.get("physical_activity_minutes")
+    if phys is not None and phys < 20:
         relevant.append("physical_activity")
-    if feats.get("screen_time", 0) > 4:
+
+    # 6. Digital habit
+    screen = feats.get("screen_time_hours")
+    digital_pres = feats.get("digital_pressure_index")
+    sm_ratio = feats.get("social_media_ratio")
+    if (screen is not None and screen > 4) or (digital_pres is not None and digital_pres >= 0.6) or (sm_ratio is not None and sm_ratio > 0.4):
         relevant.append("digital_habit")
-    if feats.get("financial_stress", 0) >= 6:
+
+    # 7. Financial habit (legacy field)
+    fin = feats.get("financial_worry_score")
+    if fin is not None and fin >= 6:
         relevant.append("financial_habit")
-    if feats.get("health_score") is not None and feats["health_score"] < 4:
+
+    # 8. Health (legacy field)
+    health = feats.get("health_condition_score")
+    if health is not None and health < 4:
         relevant.append("health")
-    if feats.get("caffeine_intake", 0) >= 3:
+
+    # 9. Caffeine (legacy field)
+    caf = feats.get("caffeine_intake_mg")
+    if caf is not None and caf >= 3:
         relevant.append("caffeine")
 
     if not relevant:
@@ -290,24 +324,54 @@ def detect_factors(feats: dict, sl: str) -> List[str]:
     if sl == "low":
         return ["Stable Routine"]
     scores = {}
-    if feats.get("study_hours", 0) > 7:
-        scores["Academic Pressure"] = feats["study_hours"] - 7
-    if feats.get("sleep_hours") is not None and feats["sleep_hours"] < 7:
-        scores["Sleep Deficit"] = 7 - feats["sleep_hours"]
-    if feats.get("mood_score") is not None and feats["mood_score"] < 5:
-        scores["Low Mood"] = 5 - feats["mood_score"]
-    if feats.get("fatigue_score", 0) >= 7:
-        scores["High Fatigue"] = feats["fatigue_score"] - 6
-    if feats.get("screen_time", 0) > 4:
-        scores["High Screen Time"] = feats["screen_time"] - 4
-    if feats.get("physical_activity") is not None and feats["physical_activity"] < 20:
-        scores["Low Physical Activity"] = (20 - feats["physical_activity"]) / 20
-    if feats.get("financial_stress", 0) >= 6:
-        scores["Financial Worry"] = feats["financial_stress"] - 5
-    if feats.get("health_score") is not None and feats["health_score"] < 4:
-        scores["Health Issue"] = 4 - feats["health_score"]
-    if feats.get("caffeine_intake", 0) >= 3:
-        scores["High Caffeine Intake"] = feats["caffeine_intake"] - 2
+
+    study_hours = feats.get("study_hours")
+    academic_pressure = feats.get("academic_pressure_index")
+    if study_hours is not None or academic_pressure is not None:
+        val_study = study_hours - 7 if study_hours is not None else 0
+        val_acad = academic_pressure * 10 - 6 if academic_pressure is not None else 0
+        if val_study > 0 or val_acad > 0:
+            scores["Academic Pressure"] = max(val_study, val_acad)
+
+    sleep = feats.get("sleep_hours")
+    if sleep is not None and sleep < 7:
+        scores["Sleep Deficit"] = 7 - sleep
+
+    mood = feats.get("mood_score")
+    if mood is not None and mood < 5:
+        scores["Low Mood"] = 5 - mood
+
+    fatigue = feats.get("fatigue_level")
+    recovery = feats.get("recovery_index")
+    if fatigue is not None or recovery is not None:
+        val_fatigue = fatigue - 6 if fatigue is not None else 0
+        val_rec = (0.5 - recovery) * 10 if recovery is not None else 0
+        if val_fatigue > 0 or val_rec > 0:
+            scores["High Fatigue"] = max(val_fatigue, val_rec)
+
+    screen = feats.get("screen_time_hours")
+    digital_pres = feats.get("digital_pressure_index")
+    if screen is not None or digital_pres is not None:
+        val_screen = screen - 4 if screen is not None else 0
+        val_dig = digital_pres * 10 - 6 if digital_pres is not None else 0
+        if val_screen > 0 or val_dig > 0:
+            scores["High Screen Time"] = max(val_screen, val_dig)
+
+    phys = feats.get("physical_activity_minutes")
+    if phys is not None and phys < 20:
+        scores["Low Physical Activity"] = (20 - phys) / 20
+
+    fin = feats.get("financial_worry_score")
+    if fin is not None and fin >= 6:
+        scores["Financial Worry"] = fin - 5
+
+    health = feats.get("health_condition_score")
+    if health is not None and health < 4:
+        scores["Health Issue"] = 4 - health
+
+    caf = feats.get("caffeine_intake_mg")
+    if caf is not None and caf >= 3:
+        scores["High Caffeine Intake"] = caf - 2
     
     detected = sorted(scores, key=scores.get, reverse=True)[:2]
     return detected if detected else (["Academic Pressure"] if sl == "high" else ["Low Mood"])
@@ -321,15 +385,11 @@ def render_insight(sl: str, factors: List[str]) -> str:
     return template
 
 def weekly_trend(levels: List[str]) -> str:
-    if not levels:
-        return "stable"
     sm = {"low": 1, "medium": 2, "high": 3}
     s = [sm.get(x.lower(), 2) for x in levels]
     if s.count(3) >= 3:
         return "high_days"
     mid = len(s) // 2
-    if mid == 0:
-        return "stable"
     diff = sum(s[mid:]) / len(s[mid:]) - sum(s[:mid]) / len(s[:mid])
     if diff > 0.3: return "worsening"
     if diff < -0.3: return "improving"
@@ -369,6 +429,17 @@ def predict_stress(data: UserInput):
 
     try:
         input_dict = data.model_dump() if hasattr(data, 'model_dump') else data.dict()
+        
+        # Calculate derived features using the new formulas
+        screen_time = input_dict['screen_time_hours']
+        social_media = input_dict['social_media_hours']
+        
+        input_dict['social_media_ratio'] = (social_media / screen_time) if screen_time > 0 else 0.0
+        input_dict['study_screen_balance'] = input_dict['study_hours'] / (screen_time + 1.0)
+        input_dict['academic_pressure_index'] = (input_dict['assignment_load'] + input_dict['deadline_pressure']) / 2.0
+        input_dict['recovery_index'] = (input_dict['sleep_hours'] * input_dict['mood_score']) / (input_dict['fatigue_level'] + 1.0)
+        input_dict['digital_pressure_index'] = screen_time + social_media
+        
         input_df = pd.DataFrame([input_dict])[FEATURE_COLS]
         
         # Standardize input features

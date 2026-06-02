@@ -9,7 +9,6 @@ class WeeklySummaryRepositories {
 
   async saveSummary({
     userId,
-    periodType,
     periodStart,
     periodEnd,
     daysCount,
@@ -28,7 +27,6 @@ class WeeklySummaryRepositories {
     highStressDays,
     maxStressScore = 0,
     stressTrend,
-    mainTrigger,
     summaryStatus = 'generated',
   }) {
     const id = nanoid(16);
@@ -37,20 +35,19 @@ class WeeklySummaryRepositories {
 
     const query = {
       text: `INSERT INTO summaries (
-               id, user_id, period_type, period_start, period_end, days_count,
+               id, user_id, period_start, period_end, days_count,
                avg_sleep_hours, avg_study_hours, avg_screen_time_hours, avg_social_media_hours,
                avg_physical_activity, total_physical_activity_minutes,
                avg_mood_score, avg_fatigue_level, avg_assignment_load, avg_deadline_pressure,
                avg_stress_score, dominant_stress_level, high_stress_days, max_stress_score,
-               stress_trend, main_trigger, summary_status,
+               stress_trend, summary_status,
                created_at, updated_at
              ) VALUES (
-               $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25
+               $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
              ) RETURNING *`,
       values: [
         id,
         userId,
-        periodType,
         periodStart,
         periodEnd,
         daysCount,
@@ -69,7 +66,6 @@ class WeeklySummaryRepositories {
         highStressDays,
         maxStressScore,
         stressTrend,
-        mainTrigger,
         summaryStatus,
         createdAt,
         updatedAt,
@@ -168,9 +164,9 @@ class WeeklySummaryRepositories {
 
       // Calculate indices per day
       const socialMediaRatio = screen > 0 ? (socialMedia / screen) : 0;
-      const studyScreenBalance = screen > 0 ? (study / screen) : 0;
+      const studyScreenBalance = study / (screen + 1.0);
       const academicPressure = (assignment + deadline) / 2.0;
-      const recovery = sleep + mood - fatigue + (physical / 120.0);
+      const recovery = (sleep * mood) / (fatigue + 1.0);
       const digitalPressure = screen + socialMedia;
 
       sumSocialMediaRatio += socialMediaRatio;

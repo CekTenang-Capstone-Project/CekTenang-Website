@@ -10,6 +10,7 @@ export const shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 export const up = (pgm) => {
+  pgm.createType('activity_status', ['draft', 'submitted']);
   pgm.createTable('daily_activities', {
     id: {
       type: 'VARCHAR(50)',
@@ -25,9 +26,8 @@ export const up = (pgm) => {
     },
 
     activity_status: {
-      type: 'enum',
+      type: 'activity_status',
       notNull: true,
-      values: ['draft', 'submitted'],
       default: 'draft',
     },
 
@@ -95,4 +95,5 @@ export const up = (pgm) => {
  */
 export const down = (pgm) => {
   pgm.dropTable('daily_activities');
+  pgm.dropType('activity_status');
 };

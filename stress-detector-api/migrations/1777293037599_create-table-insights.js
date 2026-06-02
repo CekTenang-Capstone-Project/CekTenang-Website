@@ -19,13 +19,9 @@ export const up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: true,
     },
-    weekly_summary_id: {
+    summary_id: {
       type: 'VARCHAR(50)',
       notNull: false,
-    },
-    period_type: {
-      type: 'VARCHAR(20)',
-      notNull: true,
     },
     insight_text: {
       type: 'TEXT',
@@ -39,20 +35,14 @@ export const up = (pgm) => {
 
   pgm.addConstraint(
     'insights',
-    'chk_insights.period_type',
-    "CHECK (period_type IN ('daily', 'weekly'))",
-  );
-
-  pgm.addConstraint(
-    'insights',
     'fk_insights.user_id_users.id',
     'FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE',
   );
 
   pgm.addConstraint(
     'insights',
-    'fk_insights.weekly_summary_id_weekly_summaries.id',
-    'FOREIGN KEY(weekly_summary_id) REFERENCES weekly_summaries(id) ON DELETE SET NULL',
+    'fk_insights.summary_id_summaries.id',
+    'FOREIGN KEY(summary_id) REFERENCES summaries(id) ON DELETE SET NULL',
   );
 };
 

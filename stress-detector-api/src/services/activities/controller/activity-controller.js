@@ -28,13 +28,6 @@ export const createActivity = async (req, res, next) => {
   // Fixed: was req.user.userId (always undefined). JWT payload uses { id }.
   const { id: userId } = req.user;
 
-  // Calculate new index fields
-  const socialMediaRatio = screenTimeHours > 0 ? (socialMediaHours / screenTimeHours) : 0;
-  const studyScreenBalance = screenTimeHours > 0 ? (studyHours / screenTimeHours) : 0;
-  const academicPressureIndex = (assignmentLoad + deadlinePressure) / 2.0;
-  const recoveryIndex = sleepHours + moodScore - fatigueLevel + (physicalActivityMinutes / 120.0);
-  const digitalPressureIndex = screenTimeHours + socialMediaHours;
-
   // 1. Save activity to DB
   const activity = await ActivityRepositories.createActivity({
     userId,
@@ -62,15 +55,11 @@ export const createActivity = async (req, res, next) => {
     physical_activity_minutes: physicalActivityMinutes,
     study_hours: studyHours,
     screen_time_hours: screenTimeHours,
+    social_media_hours: socialMediaHours,
     assignment_load: assignmentLoad,
     deadline_pressure: deadlinePressure,
     fatigue_level: fatigueLevel,
     mood_score: moodScore,
-    social_media_ratio: socialMediaRatio,
-    study_screen_balance: studyScreenBalance,
-    academic_pressure_index: academicPressureIndex,
-    recovery_index: recoveryIndex,
-    digital_pressure_index: digitalPressureIndex,
   };
 
   const mlResult = await predictStress(mlPayload);

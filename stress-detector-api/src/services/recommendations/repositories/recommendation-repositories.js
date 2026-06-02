@@ -8,9 +8,7 @@ class RecommendationRepositories {
 
   async saveRecommendation({
     userId,
-    weeklySummaryId = null,
-    periodType = 'weekly',
-    category = null,
+    summaryId = null,
     recommendationText,
   }) {
     const id = nanoid(16);
@@ -18,11 +16,11 @@ class RecommendationRepositories {
 
     const query = {
       text: `INSERT INTO recommendations
-               (id, user_id, weekly_summary_id, period_type,
-                category, recommendation_text, is_read, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6, FALSE, $7)
+               (id, user_id, summary_id,
+                recommendation_text, created_at)
+             VALUES ($1, $2, $3, $4, $5)
              RETURNING *`,
-      values: [id, userId, weeklySummaryId, periodType, category, recommendationText, createdAt],
+      values: [id, userId, summaryId, recommendationText, createdAt],
     };
 
     const result = await this.pool.query(query);
@@ -56,7 +54,7 @@ class RecommendationRepositories {
   async markAsRead(id, userId) {
     const query = {
       text: `UPDATE recommendations
-             SET is_read = TRUE
+             SET is_read = true
              WHERE id = $1 AND user_id = $2
              RETURNING *`,
       values: [id, userId],
@@ -67,13 +65,12 @@ class RecommendationRepositories {
 
   async getUnreadCount(userId) {
     const query = {
-      text: `SELECT COUNT(*)::int AS unread_count
-             FROM recommendations
-             WHERE user_id = $1 AND is_read = FALSE`,
+      text: `SELECT COUNT(*)::int AS count FROM recommendations
+             WHERE user_id = $1 AND is_read = false`,
       values: [userId],
     };
     const result = await this.pool.query(query);
-    return result.rows[0]?.unread_count || 0;
+    return result.rows[0]?.count ?? 0;
   }
 }
 

@@ -727,7 +727,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"activityDate\": \"{{date_day_1}}\",\n  \"sleepHours\": 8,\n  \"studyHours\": 4,\n  \"screenTimeHours\": 2,\n  \"socialMediaHours\": 1,\n  \"physicalActivityMinutes\": 40,\n  \"caffeineIntakeMg\": 50,\n  \"moodScore\": 8,\n  \"fatigueLevel\": 2,\n  \"assignmentLoad\": 1,\n  \"deadlinePressure\": 2,\n  \"socialInteractionScore\": 8,\n  \"financialWorryScore\": 2,\n  \"healthConditionScore\": 9\n}",
+              "raw": "{\n  \"activityDate\": \"{{date_day_1}}\",\n  \"sleepHours\": 8,\n  \"studyHours\": 4,\n  \"screenTimeHours\": 2,\n  \"socialMediaHours\": 1,\n  \"physicalActivityMinutes\": 40,\n  \"moodScore\": 8,\n  \"fatigueLevel\": 2,\n  \"assignmentLoad\": 1,\n  \"deadlinePressure\": 2\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -772,7 +772,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"activityDate\": \"{{date_day_2}}\",\n  \"sleepHours\": 7.5,\n  \"studyHours\": 5.5,\n  \"screenTimeHours\": 3.5,\n  \"socialMediaHours\": 2,\n  \"physicalActivityMinutes\": 30,\n  \"caffeineIntakeMg\": 100,\n  \"moodScore\": 7,\n  \"fatigueLevel\": 3,\n  \"assignmentLoad\": 2,\n  \"deadlinePressure\": 4,\n  \"socialInteractionScore\": 7,\n  \"financialWorryScore\": 2,\n  \"healthConditionScore\": 8\n}",
+              "raw": "{\n  \"activityDate\": \"{{date_day_2}}\",\n  \"sleepHours\": 7.5,\n  \"studyHours\": 5.5,\n  \"screenTimeHours\": 3.5,\n  \"socialMediaHours\": 2,\n  \"physicalActivityMinutes\": 30,\n  \"moodScore\": 7,\n  \"fatigueLevel\": 3,\n  \"assignmentLoad\": 2,\n  \"deadlinePressure\": 4\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -791,7 +791,7 @@
           }
         },
         {
-          "name": "Submit Activity Day 3",
+          "name": "Submit Activity Day 3 (High Stress)",
           "event": [
             {
               "listen": "test",
@@ -817,7 +817,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"activityDate\": \"{{date_day_3}}\",\n  \"sleepHours\": 5.0,\n  \"studyHours\": 9.0,\n  \"screenTimeHours\": 6.0,\n  \"socialMediaHours\": 3,\n  \"physicalActivityMinutes\": 0,\n  \"caffeineIntakeMg\": 300,\n  \"moodScore\": 4,\n  \"fatigueLevel\": 8,\n  \"assignmentLoad\": 8,\n  \"deadlinePressure\": 9,\n  \"socialInteractionScore\": 3,\n  \"financialWorryScore\": 5,\n  \"healthConditionScore\": 5\n}",
+              "raw": "{\n  \"activityDate\": \"{{date_day_3}}\",\n  \"sleepHours\": 5.0,\n  \"studyHours\": 9.0,\n  \"screenTimeHours\": 6.0,\n  \"socialMediaHours\": 3,\n  \"physicalActivityMinutes\": 0,\n  \"moodScore\": 4,\n  \"fatigueLevel\": 8,\n  \"assignmentLoad\": 8,\n  \"deadlinePressure\": 9\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -836,7 +836,7 @@
           }
         },
         {
-          "name": "Submit Activity Day 4",
+          "name": "Submit Activity Day 4 (Low Stress)",
           "event": [
             {
               "listen": "test",
@@ -862,7 +862,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"activityDate\": \"{{date_day_4}}\",\n  \"sleepHours\": 9.0,\n  \"studyHours\": 2.0,\n  \"screenTimeHours\": 2.0,\n  \"socialMediaHours\": 1,\n  \"physicalActivityMinutes\": 60,\n  \"caffeineIntakeMg\": 0,\n  \"moodScore\": 9,\n  \"fatigueLevel\": 2,\n  \"assignmentLoad\": 1,\n  \"deadlinePressure\": 2,\n  \"socialInteractionScore\": 9,\n  \"financialWorryScore\": 2,\n  \"healthConditionScore\": 9\n}",
+              "raw": "{\n  \"activityDate\": \"{{date_day_4}}\",\n  \"sleepHours\": 9.0,\n  \"studyHours\": 2.0,\n  \"screenTimeHours\": 2.0,\n  \"socialMediaHours\": 1,\n  \"physicalActivityMinutes\": 60,\n  \"moodScore\": 9,\n  \"fatigueLevel\": 2,\n  \"assignmentLoad\": 1,\n  \"deadlinePressure\": 2\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -881,7 +881,7 @@
           }
         },
         {
-          "name": "Submit Activity Day 5",
+          "name": "Submit Activity Day 5 (Moderate Stress)",
           "event": [
             {
               "listen": "test",
@@ -907,7 +907,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"activityDate\": \"{{date_day_5}}\",\n  \"sleepHours\": 6.0,\n  \"studyHours\": 7.0,\n  \"screenTimeHours\": 5.0,\n  \"socialMediaHours\": 2.5,\n  \"physicalActivityMinutes\": 15,\n  \"caffeineIntakeMg\": 250,\n  \"moodScore\": 5,\n  \"fatigueLevel\": 6,\n  \"assignmentLoad\": 5,\n  \"deadlinePressure\": 7,\n  \"socialInteractionScore\": 4,\n  \"financialWorryScore\": 3,\n  \"healthConditionScore\": 7\n}",
+              "raw": "{\n  \"activityDate\": \"{{date_day_5}}\",\n  \"sleepHours\": 6.0,\n  \"studyHours\": 7.0,\n  \"screenTimeHours\": 5.0,\n  \"socialMediaHours\": 2.5,\n  \"physicalActivityMinutes\": 15,\n  \"moodScore\": 5,\n  \"fatigueLevel\": 6,\n  \"assignmentLoad\": 5,\n  \"deadlinePressure\": 7\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -926,7 +926,7 @@
           }
         },
         {
-          "name": "Submit Activity Day 6",
+          "name": "Submit Activity Day 6 (High Stress)",
           "event": [
             {
               "listen": "test",
@@ -952,7 +952,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"activityDate\": \"{{date_day_6}}\",\n  \"sleepHours\": 4.5,\n  \"studyHours\": 10.0,\n  \"screenTimeHours\": 8.0,\n  \"socialMediaHours\": 4,\n  \"physicalActivityMinutes\": 0,\n  \"caffeineIntakeMg\": 400,\n  \"moodScore\": 3,\n  \"fatigueLevel\": 9,\n  \"assignmentLoad\": 9,\n  \"deadlinePressure\": 10,\n  \"socialInteractionScore\": 2,\n  \"financialWorryScore\": 6,\n  \"healthConditionScore\": 4\n}",
+              "raw": "{\n  \"activityDate\": \"{{date_day_6}}\",\n  \"sleepHours\": 4.5,\n  \"studyHours\": 10.0,\n  \"screenTimeHours\": 8.0,\n  \"socialMediaHours\": 4,\n  \"physicalActivityMinutes\": 0,\n  \"moodScore\": 3,\n  \"fatigueLevel\": 9,\n  \"assignmentLoad\": 9,\n  \"deadlinePressure\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -971,7 +971,7 @@
           }
         },
         {
-          "name": "Submit Activity Day 7",
+          "name": "Submit Activity Day 7 + Verify Stress Prediction",
           "event": [
             {
               "listen": "test",
@@ -987,6 +987,53 @@
                   "        pm.environment.set(\"activity_id_7\", jsonData.data.activity.id);",
                   "        pm.environment.set(\"activity_id\", jsonData.data.activity.id);",
                   "    }",
+                  "});",
+                  "",
+                  "pm.test(\"ML stress_prediction returned\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('prediction');",
+                  "    pm.expect(jsonData.data.prediction).to.not.be.null;",
+                  "});",
+                  "",
+                  "pm.test(\"stress_level is valid enum value\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data.prediction) {",
+                  "        const validLevels = ['low', 'moderate', 'high'];",
+                  "        pm.expect(validLevels).to.include(jsonData.data.prediction.stress_level);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"stress_score is a number between 0 and 100\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data.prediction) {",
+                  "        pm.expect(jsonData.data.prediction.stress_score).to.be.a('number');",
+                  "        pm.expect(jsonData.data.prediction.stress_score).to.be.within(0, 100);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"confidence_score is a number between 0 and 1\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data.prediction && jsonData.data.prediction.confidence_score !== null) {",
+                  "        pm.expect(jsonData.data.prediction.confidence_score).to.be.a('number');",
+                  "        pm.expect(jsonData.data.prediction.confidence_score).to.be.within(0, 1);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"prediction saved to DB with activity_id\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data.prediction) {",
+                  "        pm.expect(jsonData.data.prediction.activity_id).to.exist;",
+                  "        pm.expect(jsonData.data.prediction.user_id).to.exist;",
+                  "        pm.expect(jsonData.data.prediction.prediction_date).to.exist;",
+                  "        if (jsonData.data.prediction.id) {",
+                  "            pm.environment.set('prediction_id', jsonData.data.prediction.id);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"mlAvailable flag is present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('mlAvailable');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -998,7 +1045,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"activityDate\": \"{{date_day_7}}\",\n  \"sleepHours\": 8.5,\n  \"studyHours\": 0.0,\n  \"screenTimeHours\": 3.0,\n  \"socialMediaHours\": 2,\n  \"physicalActivityMinutes\": 45,\n  \"caffeineIntakeMg\": 100,\n  \"moodScore\": 8,\n  \"fatigueLevel\": 3,\n  \"assignmentLoad\": 0,\n  \"deadlinePressure\": 1,\n  \"socialInteractionScore\": 9,\n  \"financialWorryScore\": 2,\n  \"healthConditionScore\": 9\n}",
+              "raw": "{\n  \"activityDate\": \"{{date_day_7}}\",\n  \"sleepHours\": 8.5,\n  \"studyHours\": 0.0,\n  \"screenTimeHours\": 3.0,\n  \"socialMediaHours\": 2,\n  \"physicalActivityMinutes\": 45,\n  \"moodScore\": 8,\n  \"fatigueLevel\": 3,\n  \"assignmentLoad\": 0,\n  \"deadlinePressure\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1127,6 +1174,24 @@
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has predictions array\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.predictions).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Each prediction has required fields\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data.predictions.length > 0) {",
+                  "        const pred = jsonData.data.predictions[0];",
+                  "        pm.expect(pred).to.have.property('id');",
+                  "        pm.expect(pred).to.have.property('user_id');",
+                  "        pm.expect(pred).to.have.property('activity_id');",
+                  "        pm.expect(pred).to.have.property('stress_level');",
+                  "        pm.expect(pred).to.have.property('stress_score');",
+                  "        pm.expect(pred).to.have.property('prediction_date');",
+                  "    }",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -1166,6 +1231,16 @@
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Latest prediction has ML model fields\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data.prediction) {",
+                  "        const pred = jsonData.data.prediction;",
+                  "        pm.expect(['low','moderate','high']).to.include(pred.stress_level);",
+                  "        pm.expect(pred.stress_score).to.be.a('number');",
+                  "        pm.expect(pred.stress_score).to.be.within(0, 100);",
+                  "    }",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -1193,7 +1268,7 @@
       "name": "Weekly Summaries",
       "item": [
         {
-          "name": "Generate Weekly Summary",
+          "name": "Generate Weekly Summary + Dummy Insight & Recommendation",
           "event": [
             {
               "listen": "test",
@@ -1201,6 +1276,42 @@
                 "exec": [
                   "pm.test(\"Status code is 201\", function () {",
                   "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Summary is returned with required fields\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.summary).to.exist;",
+                  "    const s = jsonData.data.summary;",
+                  "    pm.expect(s).to.have.property('id');",
+                  "    pm.expect(s).to.have.property('avg_stress_score');",
+                  "    pm.expect(s).to.have.property('dominant_stress_level');",
+                  "    pm.expect(s).to.have.property('stress_trend');",
+                  "    if (s.id) { pm.environment.set('summary_id', s.id); }",
+                  "});",
+                  "",
+                  "pm.test(\"Dummy insight returned from ML service\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('insight');",
+                  "    if (jsonData.data.insight) {",
+                  "        pm.expect(jsonData.data.insight.insight_text).to.be.a('string');",
+                  "        pm.expect(jsonData.data.insight.insight_text).to.not.be.empty;",
+                  "        pm.expect(jsonData.data.insight.summary_id).to.exist;",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Dummy recommendation returned from ML service\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('recommendation');",
+                  "    if (jsonData.data.recommendation) {",
+                  "        pm.expect(jsonData.data.recommendation.recommendation_text).to.be.a('string');",
+                  "        pm.expect(jsonData.data.recommendation.recommendation_text).to.not.be.empty;",
+                  "        pm.expect(jsonData.data.recommendation.summary_id).to.exist;",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"mlAvailable flag is present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('mlAvailable');",
                   "});"
                 ],
                 "type": "text/javascript"
