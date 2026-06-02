@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import response from '../../../utils/response.js';
 import { InvariantError } from '../../../exceptions/index.js';
-import WeeklySummaryRepositories from '../repositories/weekly-summary-repositories.js';
+import WeeklySummaryRepositories from '../repositories/summary-repositories.js';
 import InsightRepositories from '../../insights/repositories/insight-repositories.js';
 import RecommendationRepositories from '../../recommendations/repositories/recommendation-repositories.js';
 import { generateInsight, generateRecommendation } from '../../../ai/ml-client.js';
@@ -77,37 +77,86 @@ export const generateWeeklySummary = async (req, res, next) => {
   const dailyPredictions = predictionStats?.daily_stress_levels ?? [];
 
   // Determine dominant stress level label for the week
-  const stressLevelLabel = avgStressLevel >= 2.5 ? 'high'
-    : avgStressLevel >= 1.5 ? 'medium' : 'low';
+  // Determine dominant stress level label for the week
+  const counts = { low: 0, moderate: 0, high: 0 };
+  dailyPredictions.forEach((level) => {
+    const l = (level || '').toLowerCase();
+    const normalized = l === 'medium' ? 'moderate' : l;
+    if (counts[normalized] !== undefined) {
+      counts[normalized]++;
+    }
+  });
+
+  let dominantStressLevel = 'low';
+  let maxCount = counts.low;
+  if (counts.moderate > maxCount) {
+    dominantStressLevel = 'moderate';
+    maxCount = counts.moderate;
+  }
+  if (counts.high > maxCount) {
+    dominantStressLevel = 'high';
+  }
+
+  // Map moderate back to medium for ML service
+  const stressLevelLabel = dominantStressLevel === 'moderate' ? 'medium' : dominantStressLevel;
+
+  const highStressDays = dailyPredictions.filter(
+    (level) => (level || '').toLowerCase() === 'high',
+  ).length;
+
+  const triggers = [];
+  if ((activityStats.average_assignment_load ?? 0) >= 5) triggers.push('Beban Tugas');
+  if ((activityStats.average_deadline_pressure ?? 0) >= 5) triggers.push('Tekanan Deadline');
+  if ((activityStats.average_fatigue_level ?? 0) >= 5) triggers.push('Kelelahan');
+  if ((activityStats.average_screen_time_hours ?? 0) >= 6) triggers.push('Screen Time Berlebih');
+  const mainTrigger = triggers[0] || 'Beban Tugas';
 
   // 5. Save weekly summary
   const summary = await WeeklySummaryRepositories.saveSummary({
     userId,
-    weekStart: weekStartStr,
-    weekEnd: weekEndStr,
-    averageStressLevel: avgStressLevel,
-    averageSleepHours: activityStats.average_sleep_hours ?? 0,
-    averageScreenTimeHours: activityStats.average_screen_time_hours ?? 0,
-    averageStudyHours: activityStats.average_study_hours ?? 0,
+    periodType: 'weekly',
+    periodStart: weekStartStr,
+    periodEnd: weekEndStr,
+    daysCount: activityStats.total_days,
+    avgSleepHours: activityStats.average_sleep_hours ?? 0,
+    avgStudyHours: activityStats.average_study_hours ?? 0,
+    avgScreenTimeHours: activityStats.average_screen_time_hours ?? 0,
+    avgSocialMediaHours: activityStats.average_social_media_hours ?? 0,
+    avgPhysicalActivity: activityStats.average_physical_activity ?? 0,
+    totalPhysicalActivityMinutes: activityStats.total_physical_activity_minutes ?? 0,
+    avgMoodScore: activityStats.average_mood_score ?? 0,
+    avgFatigueLevel: activityStats.average_fatigue_level ?? 0,
+    avgAssignmentLoad: activityStats.average_assignment_load ?? 0,
+    avgDeadlinePressure: activityStats.average_deadline_pressure ?? 0,
+    avgStressScore: avgStressLevel,
+    dominantStressLevel,
+    highStressDays,
+    maxStressScore: predictionStats?.max_stress_score ?? 0,
     stressTrend,
+    mainTrigger,
+    summaryStatus: 'generated',
   });
 
   // 6. Build payloads for Insight and Recommendation microservices
   const sharedFeatures = {
     sleep_hours: activityStats.average_sleep_hours ?? null,
-    mood_score: activityStats.average_mood_score ?? null,
+    physical_activity_minutes: activityStats.average_physical_activity ?? null,
     study_hours: activityStats.average_study_hours ?? null,
-    physical_activity: activityStats.average_physical_activity ?? null,
-    screen_time: activityStats.average_screen_time_hours ?? null,
-    fatigue_score: activityStats.average_fatigue_level ?? null,
-    financial_stress: activityStats.average_financial_worry ?? null,
-    health_score: activityStats.average_health_condition ?? null,
-    caffeine_intake: activityStats.average_caffeine_intake ?? null,
+    screen_time_hours: activityStats.average_screen_time_hours ?? null,
+    assignment_load: activityStats.average_assignment_load ?? null,
+    deadline_pressure: activityStats.average_deadline_pressure ?? null,
+    fatigue_level: activityStats.average_fatigue_level ?? null,
+    mood_score: activityStats.average_mood_score ?? null,
+    social_media_ratio: activityStats.average_social_media_ratio ?? null,
+    study_screen_balance: activityStats.average_study_screen_balance ?? null,
+    academic_pressure_index: activityStats.average_academic_pressure_index ?? null,
+    recovery_index: activityStats.average_recovery_index ?? null,
+    digital_pressure_index: activityStats.average_digital_pressure_index ?? null,
   };
 
   const insightPayload = {
     user_id: userId,
-    stress_prediction_id: predictionStats?.latest_prediction_id ?? 0,
+    stress_prediction_id: predictionStats?.latest_prediction_id ?? '',
     stress_level: stressLevelLabel,
     input_features: sharedFeatures,
     period_type: 'weekly',
@@ -117,7 +166,7 @@ export const generateWeeklySummary = async (req, res, next) => {
 
   const recommendationPayload = {
     user_id: userId,
-    stress_prediction_id: predictionStats?.latest_prediction_id ?? 0,
+    stress_prediction_id: predictionStats?.latest_prediction_id ?? '',
     stress_level: stressLevelLabel,
     input_features: sharedFeatures,
     period_type: 'weekly',
@@ -141,7 +190,7 @@ export const generateWeeklySummary = async (req, res, next) => {
   if (mlInsight?.insight_text) {
     insight = await InsightRepositories.saveInsight({
       userId,
-      weeklySummaryId: summary.id,
+      summaryId: summary.id,
       periodType: 'weekly',
       insightText: mlInsight.insight_text,
     });
@@ -152,7 +201,7 @@ export const generateWeeklySummary = async (req, res, next) => {
     const firstRec = mlRecommendation.recommendations[0];
     recommendation = await RecommendationRepositories.saveRecommendation({
       userId,
-      weeklySummaryId: summary.id,
+      summaryId: summary.id,
       periodType: 'weekly',
       category: firstRec.category || null,
       recommendationText: firstRec.recommendation_text,

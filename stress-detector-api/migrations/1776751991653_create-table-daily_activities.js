@@ -23,59 +23,59 @@ export const up = (pgm) => {
       type: 'DATE',
       notNull: true,
     },
+
+    activity_status: {
+      type: 'enum',
+      notNull: true,
+      values: ['draft', 'submitted'],
+      default: 'draft',
+    },
+
     sleep_hours: {
       type: 'DECIMAL(4,2)',
-      notNull: true,
     },
+
     study_hours: {
       type: 'DECIMAL(4,2)',
-      notNull: true,
     },
+
     screen_time_hours: {
       type: 'DECIMAL(4,2)',
-      notNull: true,
     },
+
     social_media_hours: {
       type: 'DECIMAL(4,2)',
-      notNull: true,
     },
+
     physical_activity_minutes: {
       type: 'INTEGER',
-      notNull: true,
     },
-    caffeine_intake_mg: {
-      type: 'INTEGER',
-      notNull: true,
-    },
+
     mood_score: {
       type: 'INTEGER',
-      notNull: true,
     },
+
     fatigue_level: {
       type: 'INTEGER',
-      notNull: true,
     },
+
     assignment_load: {
       type: 'INTEGER',
-      notNull: true,
     },
+
     deadline_pressure: {
       type: 'INTEGER',
-      notNull: true,
     },
-    social_interaction_score: {
-      type: 'INTEGER',
-      notNull: true,
+
+    note: {
+      type: 'VARCHAR(500)',
     },
-    financial_worry_score: {
-      type: 'INTEGER',
-      notNull: true,
-    },
-    health_condition_score: {
-      type: 'INTEGER',
-      notNull: true,
-    },
+
     created_at: {
+      type: 'TIMESTAMPTZ',
+      notNull: true,
+    },
+    updated_at: {
       type: 'TIMESTAMPTZ',
       notNull: true,
     },

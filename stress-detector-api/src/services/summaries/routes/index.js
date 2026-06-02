@@ -4,7 +4,7 @@ import {
   getWeeklySummaries,
   getLatestWeeklySummary,
   generateWeeklySummary,
-} from '../controller/weekly-summary-controller.js';
+} from '../controller/summary-controller.js';
 
 const router = Router();
 

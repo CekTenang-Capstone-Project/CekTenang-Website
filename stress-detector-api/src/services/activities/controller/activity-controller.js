@@ -17,18 +17,23 @@ export const createActivity = async (req, res, next) => {
     screenTimeHours,
     socialMediaHours,
     physicalActivityMinutes,
-    caffeineIntakeMg,
     moodScore,
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    socialInteractionScore,
-    financialWorryScore,
-    healthConditionScore,
+    activityStatus,
+    note,
   } = req.validated;
 
   // Fixed: was req.user.userId (always undefined). JWT payload uses { id }.
   const { id: userId } = req.user;
+
+  // Calculate new index fields
+  const socialMediaRatio = screenTimeHours > 0 ? (socialMediaHours / screenTimeHours) : 0;
+  const studyScreenBalance = screenTimeHours > 0 ? (studyHours / screenTimeHours) : 0;
+  const academicPressureIndex = (assignmentLoad + deadlinePressure) / 2.0;
+  const recoveryIndex = sleepHours + moodScore - fatigueLevel + (physicalActivityMinutes / 120.0);
+  const digitalPressureIndex = screenTimeHours + socialMediaHours;
 
   // 1. Save activity to DB
   const activity = await ActivityRepositories.createActivity({
@@ -39,14 +44,12 @@ export const createActivity = async (req, res, next) => {
     screenTimeHours,
     socialMediaHours,
     physicalActivityMinutes,
-    caffeineIntakeMg,
     moodScore,
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    socialInteractionScore,
-    financialWorryScore,
-    healthConditionScore,
+    activityStatus,
+    note,
   });
 
   if (!activity) {
@@ -56,18 +59,18 @@ export const createActivity = async (req, res, next) => {
   // 2. Call ML service for stress prediction (non-blocking — failure is tolerated)
   const mlPayload = {
     sleep_hours: sleepHours,
+    physical_activity_minutes: physicalActivityMinutes,
     study_hours: studyHours,
     screen_time_hours: screenTimeHours,
-    social_media_hours: socialMediaHours,
-    physical_activity_minutes: physicalActivityMinutes,
-    caffeine_intake_mg: caffeineIntakeMg,
-    mood_score: moodScore,
-    fatigue_level: fatigueLevel,
     assignment_load: assignmentLoad,
     deadline_pressure: deadlinePressure,
-    social_interaction_score: socialInteractionScore,
-    financial_worry_score: financialWorryScore,
-    health_condition_score: healthConditionScore,
+    fatigue_level: fatigueLevel,
+    mood_score: moodScore,
+    social_media_ratio: socialMediaRatio,
+    study_screen_balance: studyScreenBalance,
+    academic_pressure_index: academicPressureIndex,
+    recovery_index: recoveryIndex,
+    digital_pressure_index: digitalPressureIndex,
   };
 
   const mlResult = await predictStress(mlPayload);

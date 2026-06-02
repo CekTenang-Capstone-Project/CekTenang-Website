@@ -2,7 +2,7 @@ import amqp from 'amqplib';
 import nodemailer from 'nodemailer';
 import UserRepositories from '../users/repositories/user-repositories.js';
 import PredictionRepositories from '../predictions/repositories/prediction-repositories.js';
-import WeeklySummaryRepositories from '../weekly-summaries/repositories/weekly-summary-repositories.js';
+import WeeklySummaryRepositories from '../summaries/repositories/summary-repositories.js';
 import InsightRepositories from '../insights/repositories/insight-repositories.js';
 import RecommendationRepositories from '../recommendations/repositories/recommendation-repositories.js';
 

@@ -14,48 +14,44 @@ class ActivityRepositories {
     screenTimeHours,
     socialMediaHours,
     physicalActivityMinutes,
-    caffeineIntakeMg,
     moodScore,
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    socialInteractionScore,
-    financialWorryScore,
-    healthConditionScore,
+    activityStatus = 'submitted',
+    note = null,
   }) {
     const id = nanoid(16);
     const createdAt = new Date().toISOString();
+    const updatedAt = createdAt;
 
     const query = {
       text: `INSERT INTO daily_activities (
-               id, user_id, activity_date,
+               id, user_id, activity_date, activity_status,
                sleep_hours, study_hours, screen_time_hours, social_media_hours,
-               physical_activity_minutes, caffeine_intake_mg,
-               mood_score, fatigue_level, assignment_load, deadline_pressure,
-               social_interaction_score, financial_worry_score, health_condition_score,
-               created_at
+               physical_activity_minutes, mood_score, fatigue_level,
+               assignment_load, deadline_pressure, note,
+               created_at, updated_at
              ) VALUES (
-               $1, $2, $3, $4, $5, $6, $7, $8, $9,
-               $10, $11, $12, $13, $14, $15, $16, $17
+               $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
              ) RETURNING *`,
       values: [
         id,
         userId,
         activityDate,
+        activityStatus,
         sleepHours,
         studyHours,
         screenTimeHours,
         socialMediaHours,
         physicalActivityMinutes,
-        caffeineIntakeMg,
         moodScore,
         fatigueLevel,
         assignmentLoad,
         deadlinePressure,
-        socialInteractionScore,
-        financialWorryScore,
-        healthConditionScore,
+        note,
         createdAt,
+        updatedAt,
       ],
     };
 
