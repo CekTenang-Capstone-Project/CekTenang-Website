@@ -21,7 +21,6 @@ export const createActivity = async (req, res, next) => {
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    activityStatus,
     note,
   } = req.validated;
 
@@ -41,7 +40,6 @@ export const createActivity = async (req, res, next) => {
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    activityStatus,
     note,
   });
 
@@ -158,7 +156,6 @@ export const updateActivity = async (req, res, next) => {
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    activityStatus,
     note,
   } = req.validated;
 
@@ -183,7 +180,6 @@ export const updateActivity = async (req, res, next) => {
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    activityStatus,
     note,
   });
 

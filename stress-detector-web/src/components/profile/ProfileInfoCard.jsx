@@ -1,25 +1,21 @@
 import { Mail, User, ChevronRight } from "lucide-react";
+import { useLanguage } from "../../contexts/LanguageContext";
 
-function ProfileInfoCard({
-  fullName = "Aryanda Sanggadiennata",
-  email = "aryanda@email.com",
-  onUpdate,
-}) {
+function ProfileInfoCard({ fullName, email, onUpdate}) {
+  const { t } = useLanguage();
+  
   return (
     <div className="theme-card rounded-3xl border backdrop-blur-xl overflow-hidden">
 
       {/* Header */}
       <div className="theme-border-soft p-6 border-b">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-blue-400 mb-2">
-          Account Information
-        </p>
 
         <h3 className="theme-text text-2xl font-bold">
-          Informasi Akun
+          {t.AccountInformationTitle}
         </h3>
 
         <p className="theme-muted text-sm mt-1">
-          Kelola informasi profil dan data akun Anda.
+          {t.AccountInformationDescription}
         </p>
       </div>
 
@@ -37,7 +33,7 @@ function ProfileInfoCard({
 
             <div>
               <p className="theme-subtle text-xs uppercase tracking-wider">
-                Full Name
+                {t.FullNameLabel}
               </p>
 
               <p className="theme-text font-medium mt-1">
@@ -58,7 +54,7 @@ function ProfileInfoCard({
 
             <div>
               <p className="theme-subtle text-xs uppercase tracking-wider">
-                Email Address
+                {t.EmailAddressLabel}
               </p>
 
               <p className="theme-text font-medium mt-1">
@@ -86,7 +82,7 @@ function ProfileInfoCard({
             shadow-lg shadow-blue-500/20
           "
         >
-          Update Information
+          {t.UpdateInformationButton}
           <ChevronRight size={16} />
         </button>
       </div>

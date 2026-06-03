@@ -7,6 +7,7 @@ const UserContext = createContext();
 export function UserProvider({ children }) {
   const [user, setUser] = useState({
     fullname: "",
+    email: "",
     role: "",
     profileImage: null,
   });
@@ -27,6 +28,7 @@ export function UserProvider({ children }) {
       if (!result.error) {
         setUser({
           fullname: result.data.fullname || "",
+          email: result.data.email || "",
           role: result.data.role || "",
           profileImage:
             result.data.profileImage ||

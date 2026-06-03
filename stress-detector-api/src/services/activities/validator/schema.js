@@ -12,6 +12,5 @@ export const createActivitySchema = Joi.object({
   assignmentLoad: Joi.number().integer().min(0).required(),
   deadlinePressure: Joi.number().integer().min(1).max(10).required(),
   note: Joi.string().max(500).allow('', null).optional(),
-  activityStatus: Joi.string().valid('draft', 'submitted').default('submitted').optional(),
 });
 

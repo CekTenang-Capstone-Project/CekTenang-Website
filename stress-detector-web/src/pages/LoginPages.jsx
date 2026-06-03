@@ -49,10 +49,13 @@ function LoginPage() {
     const { error, data, message } = await login({ email, password });
 
     if (error) {
-      if (message.toLowerCase().includes("kredensial")) {
+      const lowerMessage = String(message || "").toLowerCase();
+      if (lowerMessage.includes("password")) {
+        setPasswordError("Password salah");
+      } else if (lowerMessage.includes("email")) {
+        setEmailError("Email tidak ada");
+      } else if (lowerMessage.includes("kredensial")) {
         setPasswordError("Email atau password salah.");
-      } else if (message.toLowerCase().includes("email")) {
-        setEmailError(message);
       } else {
         setApiError(message);
       }

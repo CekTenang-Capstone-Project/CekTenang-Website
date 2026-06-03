@@ -1,13 +1,35 @@
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import SidebarItem from "./SidebarItem";
 import logo from "../../assets/img/logo.png";
 import IconsSidebar from "./IconsSidebar";
 
 // Contexts
 import { useLanguage } from "../../contexts/LanguageContext";
+import { useUser } from "../../contexts/UserContext";
+import { logout as logoutApi } from "../../services/authService";
 
 function Sidebar({ isOpen, setIsOpen }) {
   const { t } = useLanguage();
+  const { setUser } = useUser();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    try {
+      if (refreshToken) {
+        await logoutApi(refreshToken);
+      }
+    } catch (err) {
+      console.error("Logout API failed:", err);
+    }
+
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    setUser({ fullname: "", email: "", role: "", profileImage: null });
+    navigate("/login", { replace: true });
+  };
 
   return (
     <>
@@ -160,9 +182,15 @@ function Sidebar({ isOpen, setIsOpen }) {
                 </div>
             </SidebarItem>
 
-             <SidebarItem
-              to="/login"
-              icon={
+             <button
+              type="button"
+              onClick={handleLogout}
+              className="
+                flex w-full items-center gap-2 py-3 text-sm font-medium transition-colors
+                theme-muted hover:text-(--text)
+              "
+            >
+              <span>
                 <IconsSidebar
                   paths={
                     <>
@@ -176,10 +204,11 @@ function Sidebar({ isOpen, setIsOpen }) {
                     </>
                   }
                 />
-              }
-            >
-              {t.LogoutSdbr}
-            </SidebarItem>
+              </span>
+              <span className="truncate text-[15px] leading-normal">
+                {t.LogoutSdbr}
+              </span>
+            </button>
           </div>
 
         </nav>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-function PasswordCard({ onSubmit }) {
+function PasswordCard({ onSubmit, error, success }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -52,7 +52,7 @@ function PasswordCard({ onSubmit }) {
             <button
               type="button"
               onClick={() => toggleVisibility("current")}
-              className="theme-muted absolute right-3 top-1/2 -translate-y-1/2 hover:text-[var(--text)] transition"
+              className="theme-muted absolute right-3 top-1/2 -translate-y-1/2 hover:text-(--text) transition"
             >
               {showPasswords.current ? (
                 <EyeOff size={18} />
@@ -81,7 +81,7 @@ function PasswordCard({ onSubmit }) {
               <button
                 type="button"
                 onClick={() => toggleVisibility("new")}
-                className="theme-muted absolute right-3 top-1/2 -translate-y-1/2 hover:text-[var(--text)] transition"
+                className="theme-muted absolute right-3 top-1/2 -translate-y-1/2 hover:text-(--text) transition"
               >
                 {showPasswords.new ? (
                   <EyeOff size={18} />
@@ -108,7 +108,7 @@ function PasswordCard({ onSubmit }) {
               <button
                 type="button"
                 onClick={() => toggleVisibility("confirm")}
-                className="theme-muted absolute right-3 top-1/2 -translate-y-1/2 hover:text-[var(--text)] transition"
+                className="theme-muted absolute right-3 top-1/2 -translate-y-1/2 hover:text-(--text) transition"
               >
                 {showPasswords.confirm ? (
                   <EyeOff size={18} />
@@ -121,13 +121,19 @@ function PasswordCard({ onSubmit }) {
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end pt-4">
+        <div className="flex flex-col gap-3 pt-4">
           <button
             type="submit"
             className="theme-card-muted px-8 py-2 border rounded-lg transition-all duration-300 text-sm font-medium theme-hover"
           >
             Reset Password
           </button>
+          {error && (
+            <p className="text-sm text-red-500">{error}</p>
+          )}
+          {success && (
+            <p className="text-sm text-green-500">{success}</p>
+          )}
         </div>
       </form>
     </div>

@@ -18,7 +18,6 @@ class ActivityRepositories {
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    activityStatus = 'submitted',
     note = null,
   }) {
     const id = nanoid(16);
@@ -27,19 +26,18 @@ class ActivityRepositories {
 
     const query = {
       text: `INSERT INTO daily_activities (
-               id, user_id, activity_date, activity_status,
+               id, user_id, activity_date,
                sleep_hours, study_hours, screen_time_hours, social_media_hours,
                physical_activity_minutes, mood_score, fatigue_level,
                assignment_load, deadline_pressure, note,
                created_at, updated_at
              ) VALUES (
-               $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+               $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
              ) RETURNING *`,
       values: [
         id,
         userId,
         activityDate,
-        activityStatus,
         sleepHours,
         studyHours,
         screenTimeHours,
@@ -103,7 +101,6 @@ class ActivityRepositories {
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    activityStatus = 'submitted',
     note = null,
   }) {
     const updatedAt = new Date().toISOString();
@@ -111,24 +108,22 @@ class ActivityRepositories {
     const query = {
       text: `UPDATE daily_activities SET
                activity_date = $2,
-               activity_status = $3,
-               sleep_hours = $4,
-               study_hours = $5,
-               screen_time_hours = $6,
-               social_media_hours = $7,
-               physical_activity_minutes = $8,
-               mood_score = $9,
-               fatigue_level = $10,
-               assignment_load = $11,
-               deadline_pressure = $12,
-               note = $13,
-               updated_at = $14
+               sleep_hours = $3,
+               study_hours = $4,
+               screen_time_hours = $5,
+               social_media_hours = $6,
+               physical_activity_minutes = $7,
+               mood_score = $8,
+               fatigue_level = $9,
+               assignment_load = $10,
+               deadline_pressure = $11,
+               note = $12,
+               updated_at = $13
              WHERE id = $1
              RETURNING *`,
       values: [
         id,
         activityDate,
-        activityStatus,
         sleepHours,
         studyHours,
         screenTimeHours,

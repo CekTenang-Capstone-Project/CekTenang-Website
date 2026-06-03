@@ -44,30 +44,49 @@ function useActivityForm(t) {
     setError("");
     setMessage("");
 
-    const { error: hasError, message: responseMessage } = await createActivity(
-      buildActivityPayload(form),
+    try {
+      const { error: hasError, message: responseMessage } = await createActivity(
+        buildActivityPayload(form, "submitted"),
+      );
+
+      if (hasError) {
+        setError(responseMessage);
+        setIsSubmitting(false);
+        return;
+      }
+
+      setMessage(responseMessage || t.ActivitySuccessMessage);
+      setShowAnalysis(true);
+      setForm((currentForm) => ({
+        ...initialActivityForm,
+        activityDate: currentForm.activityDate,
+      }));
+    } catch (error) {
+      setError(error.message || t.ActivitySubmitErrorMessage || "Terjadi kesalahan saat mengirim data.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleSaveDraft(event) {
+    event.preventDefault();
+
+    setIsSubmitting(true);
+
+    const result = await createActivity(
+      buildActivityPayload(form, "draft")
     );
 
-    if (hasError) {
-      setError(responseMessage);
-      setIsSubmitting(false);
-      return;
+    if (result.error) {
+      setError(result.message);
+    } else {
+      setMessage("Draft berhasil disimpan");
     }
 
-    setMessage(responseMessage || t.ActivitySuccessMessage);
-    setShowAnalysis(true);
-    setForm((currentForm) => ({
-      ...initialActivityForm,
-      activityDate: currentForm.activityDate,
-    }));
     setIsSubmitting(false);
   }
 
-  function handleSaveDraft(event) {
-    event.preventDefault();
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
-    setError("");
-    setMessage(t.ActivityDraftSavedMessage);
+  function handleCloseAnalysis() {
     setShowAnalysis(false);
   }
 
@@ -77,6 +96,7 @@ function useActivityForm(t) {
     handleChange,
     handleSubmit,
     handleSaveDraft,
+    handleCloseAnalysis,
     isSubmitting,
     message,
     showAnalysis,

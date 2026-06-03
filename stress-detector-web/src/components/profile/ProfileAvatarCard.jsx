@@ -1,13 +1,8 @@
 import { Pencil, Save } from "lucide-react";
+import { useLanguage } from "../../contexts/LanguageContext";
 
-function ProfileAvatarCard({
-  image = "/api/placeholder/120",
-  name = "Aryanda",
-  role = "Student",
-  onEdit,
-  onSavePhoto,
-  hasNewPhoto = false,
-}) {
+function ProfileAvatarCard({ image, name, role, onEdit, onSavePhoto, hasNewPhoto = false, }) {
+  const { t } = useLanguage();
   return (
     <div className="theme-card rounded-3xl border backdrop-blur-xl p-6">
       <div className="flex flex-col md:flex-row items-center gap-6">
@@ -21,38 +16,13 @@ function ProfileAvatarCard({
               className="w-full h-full object-cover"
             />
           </div>
-
-          {/* Floating Edit Button */}
-          <button
-            onClick={onEdit}
-            className="
-              absolute
-              -bottom-2
-              -right-2
-              w-10
-              h-10
-              rounded-full
-              theme-card-muted
-              border
-              theme-border
-              theme-hover
-              transition-all
-              flex
-              items-center
-              justify-center
-              shadow-lg
-            "
-            aria-label="Edit Photo"
-          >
-            <Pencil size={16} className="theme-text" />
-          </button>
         </div>
 
         {/* User Info */}
         <div className="flex-1 text-center md:text-left">
 
           <p className="uppercase tracking-[0.25em] text-[11px] text-blue-400 mb-2">
-            Account Profile
+            {t.AccountProfileLabel}
           </p>
 
           <h1 className="theme-text text-3xl md:text-4xl font-bold">
@@ -85,7 +55,7 @@ function ProfileAvatarCard({
               "
             >
               <Pencil size={16} />
-              Edit Photo
+              {t.EditPhotoButton}
             </button>
 
             {hasNewPhoto && (
@@ -109,14 +79,14 @@ function ProfileAvatarCard({
                 "
               >
                 <Save size={16} />
-                Save Photo
+                {t.SavePhotoButton}
               </button>
             )}
           </div>
 
           {hasNewPhoto && (
             <p className="mt-3 text-xs text-amber-400">
-              You have unsaved profile photo changes.
+              {t.UnsavePhotoLabel}
             </p>
           )}
         </div>

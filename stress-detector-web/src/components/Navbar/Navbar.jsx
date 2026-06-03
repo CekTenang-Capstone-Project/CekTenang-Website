@@ -6,10 +6,12 @@ import { useUser } from "../../contexts/UserContext";
 
 function Navbar({ title, isOpen, setIsOpen}) {
   const { user } = useUser();
-  console.log(
-  "IMAGE URL:",
-  `http://localhost:3000/uploads/images/${user.profileImage}`
-);
+
+  const profileSrc = user.profileImage
+    ? user.profileImage.startsWith("http")
+      ? user.profileImage
+      : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"}/uploads/images/${encodeURIComponent(user.profileImage)}`
+    : null;
 
   return (
     <header

@@ -18,7 +18,7 @@ function formatJournalDate(dateValue, locale) {
 
 function LogActivitiesPage() {
   const { t } = useLanguage();
-  const { error, form, handleChange, handleSubmit, handleSaveDraft, isSubmitting, message, showAnalysis } = useActivityForm(t);
+  const { error, form, handleChange, handleSubmit, handleSaveDraft, handleCloseAnalysis, isSubmitting, message, showAnalysis } = useActivityForm(t);
   const journalDate = formatJournalDate(form.activityDate, t.DashboardDateLocale);
 
   return (
@@ -87,8 +87,14 @@ function LogActivitiesPage() {
             onSaveDraft={handleSaveDraft}
             t={t}
           />
-          <ActivityAnalysisPanel form={form} t={t} visible={showAnalysis} />
         </form>
+
+        <ActivityAnalysisPanel
+          form={form}
+          t={t}
+          visible={showAnalysis}
+          onClose={handleCloseAnalysis}
+        />
       </div>
     </Layout>
   );
