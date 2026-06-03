@@ -2,33 +2,40 @@ import amqp from 'amqplib';
 import nodemailer from 'nodemailer';
 import UserRepositories from '../users/repositories/user-repositories.js';
 import PredictionRepositories from '../predictions/repositories/prediction-repositories.js';
-import WeeklySummaryRepositories from '../weekly-summaries/repositories/weekly-summary-repositories.js';
+import WeeklySummaryRepositories from '../summaries/repositories/summary-repositories.js';
 import InsightRepositories from '../insights/repositories/insight-repositories.js';
 import RecommendationRepositories from '../recommendations/repositories/recommendation-repositories.js';
 
 class Consumer {
   constructor() {
-    const user = process.env.RABBITMQ_USER || 'guest';
-    const pass = process.env.RABBITMQ_PASSWORD || 'guest';
-    const host = process.env.RABBITMQ_HOST || 'localhost';
-    const port = process.env.RABBITMQ_PORT || '5672';
+    const user = process.env.RABBITMQ_USER;
+    const pass = process.env.RABBITMQ_PASSWORD;
+    const host = process.env.RABBITMQ_HOST;
+    const port = process.env.RABBITMQ_PORT;
 
     this.amqpUri = `amqp://${user}:${pass}@${host}:${port}`;
 
-    this.transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST || 'smtp.mailtrap.io',
-      port: parseInt(process.env.MAIL_PORT || '2525'),
-      auth: {
-        user: process.env.MAIL_USER || 'f56827880f355c',
-        pass: process.env.MAIL_PASSWORD || 'f67f4833aa6429',
-      },
-    });
+    this.transporter = nodemailer.createTransport(
+      process.env.MOCK_MAIL?.trim() === 'true'
+        ? { jsonTransport: true }
+        : {
+          host: process.env.MAIL_HOST,
+          port: parseInt(process.env.MAIL_PORT),
+          auth: {
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASSWORD,
+          },
+        },
+    );
   }
 
   async start() {
     try {
       const connection = await amqp.connect(this.amqpUri);
       const channel = await connection.createChannel();
+
+      // Memastikan consumer hanya memproses 1 pesan sekaligus secara berurutan
+      await channel.prefetch(1);
 
       await channel.assertQueue('export:stress-results', {
         durable: true,
@@ -66,6 +73,9 @@ class Consumer {
       `[Info] Processing export task for User ID: ${userId}, Email: ${targetEmail}, Type: ${type}`,
     );
 
+    // Jeda 3.5 detik untuk menghindari rate limit 'Too many emails per second' pada Mailtrap Free Tier
+    await new Promise((resolve) => setTimeout(resolve, 3500));
+
     const userResult = await UserRepositories.getUserById(userId);
     const user = userResult.data;
     if (!user) {
@@ -95,8 +105,10 @@ class Consumer {
     } else if (type === 'weekly') {
       const summary = await WeeklySummaryRepositories.getLatestSummary(userId);
       const insight = await InsightRepositories.getLatestInsight(userId);
-      const recommendation =
-        await RecommendationRepositories.getLatestRecommendation(userId);
+      let recommendations = [];
+      if (summary) {
+        recommendations = await RecommendationRepositories.getRecommendationsBySummary(summary.id);
+      }
 
       let htmlContent;
       if (!summary) {
@@ -106,14 +118,16 @@ class Consumer {
           userName,
           summary,
           insight,
-          recommendation,
+          recommendations,
         );
       }
+
 
       await this.transporter.sendMail({
         from: '"CekTenang Team" <no-reply@cektenang.id>',
         to: targetEmail,
-        subject: '[CekTenang] Ringkasan & Rekomendasi Kesehatan Mental Mingguan Anda',
+        subject:
+          '[CekTenang] Ringkasan & Rekomendasi Kesehatan Mental Mingguan Anda',
         html: htmlContent,
       });
     }
@@ -211,49 +225,35 @@ class Consumer {
     `;
   }
 
-  getWeeklyTemplate(userName, summary, insight, recommendation) {
-    const avgStress = parseFloat(summary.average_stress_level).toFixed(1);
-    const avgSleep = parseFloat(summary.average_sleep_hours).toFixed(1);
-    const avgScreen = parseFloat(summary.average_screen_time_hours).toFixed(1);
-    const trend = summary.stress_trend || 'stable';
-
-    const startDateStr = new Date(summary.week_start).toLocaleDateString(
+  getWeeklyTemplate(userName, summary, insight, recommendations) {
+    const startDateStr = new Date(summary.period_start).toLocaleDateString(
       'id-ID',
       { month: 'short', day: 'numeric' },
     );
-    const endDateStr = new Date(summary.week_end).toLocaleDateString('id-ID', {
+    const endDateStr = new Date(summary.period_end).toLocaleDateString('id-ID', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
 
-    let trendIcon = '➡️';
-    let trendText = 'Stabil';
-    let trendColor = '#6b7280';
-    if (trend === 'improving') {
-      trendIcon = '📉';
-      trendText = 'Membaik (Menurun)';
-      trendColor = '#10b981';
-    } else if (trend === 'worsening') {
-      trendIcon = '📈';
-      trendText = 'Memburuk (Meningkat)';
-      trendColor = '#ef4444';
-    }
-
-    const insightHtml = insight ? `
+    const insightHtml = insight
+      ? `
       <div style="border-left: 4px solid hsl(174, 60%, 40%); background-color: #f0fdfa; padding: 20px; border-radius: 0 12px 12px 0; margin-bottom: 24px;">
         <h3 style="color: hsl(174, 70%, 30%); margin: 0 0 8px 0; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Wawasan AI Anda</h3>
         <p style="color: #111827; font-size: 14.5px; line-height: 1.6; margin: 0;">"${insight.insight_text}"</p>
       </div>
-    ` : '';
+    `
+      : '';
 
-    const recommendationHtml = recommendation ? `
-      <div style="background-color: #fcf8f2; border: 1px solid #f3e8d3; padding: 20px; border-radius: 12px; margin-bottom: 32px;">
-        <h3 style="color: #b45309; margin: 0 0 8px 0; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">💡 Rekomendasi Terapi</h3>
-        <span style="display: inline-block; background-color: #fef3c7; color: #b45309; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-bottom: 12px;">Kategori: ${recommendation.category || 'Umum'}</span>
-        <p style="color: #451a03; font-size: 14.5px; line-height: 1.6; margin: 0;">${recommendation.recommendation_text}</p>
+    const recommendationHtml = recommendations && recommendations.length > 0
+      ? recommendations.map((rec) => `
+      <div style="background-color: #fcf8f2; border: 1px solid #f3e8d3; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+        <h3 style="color: #b45309; margin: 0 0 8px 0; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">💡 Rekomendasi Terapi: ${rec.title || 'Umum'}</h3>
+        <span style="display: inline-block; background-color: #fef3c7; color: #b45309; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-bottom: 12px;">Kategori: ${rec.category || 'Umum'} | Prioritas: ${rec.priority_level || 'Medium'}</span>
+        <p style="color: #451a03; font-size: 14.5px; line-height: 1.6; margin: 0;">${rec.recommendation_text}</p>
       </div>
-    ` : '';
+    `).join('')
+      : '';
 
     return `
       <!DOCTYPE html>
@@ -278,39 +278,6 @@ class Consumer {
             <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-top: 0;">Halo, <strong>${userName}</strong>!</p>
             <p style="color: #4b5563; font-size: 15px; line-height: 1.6;">Kerja bagus telah rutin memantau kondisi emosional Anda minggu ini! AI CekTenang telah mengompilasi seluruh data harian Anda untuk memberikan ringkasan holistik serta rekomendasi personal:</p>
             
-            <!-- Summary Dashboard Stats (Grid equivalent) -->
-            <div style="margin: 32px 0; border-collapse: collapse; width: 100%;">
-              <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="width: 50%; padding: 8px; box-sizing: border-box;">
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-                      <span style="font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: bold; display: block; margin-bottom: 4px;">Rerata Stres</span>
-                      <strong style="font-size: 24px; color: #111827;">${avgStress}</strong> <span style="font-size: 12px; color: #6b7280;">/ 10</span>
-                    </div>
-                  </td>
-                  <td style="width: 50%; padding: 8px; box-sizing: border-box;">
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-                      <span style="font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: bold; display: block; margin-bottom: 4px;">Tren Stres</span>
-                      <strong style="font-size: 15px; color: ${trendColor};">${trendIcon} ${trendText}</strong>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="width: 50%; padding: 8px; box-sizing: border-box;">
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-                      <span style="font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: bold; display: block; margin-bottom: 4px;">Tidur Harian</span>
-                      <strong style="font-size: 20px; color: #111827;">${avgSleep}</strong> <span style="font-size: 12px; color: #6b7280;">Jam</span>
-                    </div>
-                  </td>
-                  <td style="width: 50%; padding: 8px; box-sizing: border-box;">
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; text-align: center;">
-                      <span style="font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: bold; display: block; margin-bottom: 4px;">Waktu Layar</span>
-                      <strong style="font-size: 20px; color: #111827;">${avgScreen}</strong> <span style="font-size: 12px; color: #6b7280;">Jam</span>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </div>
 
             <!-- Insight Box -->
             ${insightHtml}

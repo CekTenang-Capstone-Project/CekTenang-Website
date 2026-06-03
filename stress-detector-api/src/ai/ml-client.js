@@ -204,3 +204,67 @@ export const generateRecommendation = async (recommendationPayload) => {
     return null;
   }
 };
+
+/**
+ * Generate AI weekly insight and recommendations using Groq AI RAG.
+ * @param {object} weeklyRAGPayload — weekly RAG request body matching WeeklyRAGRequest schema
+ * @returns {{ success, user_id, insight, recommendations: [...] } | null}
+ */
+export const generateWeeklyRAG = async (weeklyRAGPayload) => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), ML_TIMEOUT_MS);
+
+    const res = await fetch(`${INSIGHT_SERVICE_URL}/weekly-rag`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(weeklyRAGPayload),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      console.warn(`[ML Client] generateWeeklyRAG → HTTP ${res.status}. Using fallback.`);
+      return getWeeklyRAGFallback(weeklyRAGPayload.weekly_stress_prediction, weeklyRAGPayload.user_id);
+    }
+
+    return await res.json();
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      console.warn('[ML Client] generateWeeklyRAG → request timed out. Using fallback.');
+    } else {
+      console.warn('[ML Client] generateWeeklyRAG → service unreachable:', err.message, '. Using fallback.');
+    }
+    return getWeeklyRAGFallback(weeklyRAGPayload.weekly_stress_prediction, weeklyRAGPayload.user_id);
+  }
+};
+
+const getWeeklyRAGFallback = (weeklyStressPrediction, userId) => {
+  return {
+    success: false,
+    user_id: userId,
+    insight: `Tingkat stres mingguan Anda terpantau ${weeklyStressPrediction === 'high' ? 'tinggi' : weeklyStressPrediction === 'medium' ? 'sedang' : 'rendah'}. Jaga selalu pola makan, tidur, dan aktivitas fisik Anda.`,
+    recommendations: [
+      {
+        category: 'lifestyle',
+        priority_level: 'medium',
+        title: 'Jaga Keseimbangan',
+        text: 'Luangkan waktu 15 menit untuk relaksasi atau aktivitas tanpa layar.'
+      },
+      {
+        category: 'sleep',
+        priority_level: 'high',
+        title: 'Tidur Cukup',
+        text: 'Usahakan tidur 7-8 jam setiap malam untuk membantu pemulihan energi.'
+      },
+      {
+        category: 'mindfulness',
+        priority_level: 'low',
+        title: 'Latihan Napas',
+        text: 'Lakukan latihan napas dalam selama 5 menit ketika merasa tegang.'
+      }
+    ]
+  };
+};
+

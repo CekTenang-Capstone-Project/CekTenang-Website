@@ -19,17 +19,21 @@ export const up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: true,
     },
-    weekly_summary_id: {
+    summary_id: {
       type: 'VARCHAR(50)',
       notNull: false,
-    },
-    period_type: {
-      type: 'VARCHAR(20)',
-      notNull: true,
     },
     category: {
       type: 'VARCHAR(50)',
-      notNull: false,
+      notNull: true,
+    },
+    priority_level: {
+      type: 'VARCHAR(50)',
+      notNull: true,
+    },
+    title: {
+      type: 'VARCHAR(255)',
+      notNull: true,
     },
     recommendation_text: {
       type: 'TEXT',
@@ -48,20 +52,14 @@ export const up = (pgm) => {
 
   pgm.addConstraint(
     'recommendations',
-    'chk_recommendations.period_type',
-    "CHECK (period_type IN ('daily', 'weekly'))",
-  );
-
-  pgm.addConstraint(
-    'recommendations',
     'fk_recommendations.user_id_users.id',
     'FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE',
   );
 
   pgm.addConstraint(
     'recommendations',
-    'fk_recommendations.weekly_summary_id_weekly_summaries.id',
-    'FOREIGN KEY(weekly_summary_id) REFERENCES weekly_summaries(id) ON DELETE SET NULL',
+    'fk_recommendations.summary_id_summaries.id',
+    'FOREIGN KEY(summary_id) REFERENCES summaries(id) ON DELETE SET NULL',
   );
 };
 

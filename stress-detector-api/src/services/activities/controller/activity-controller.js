@@ -17,14 +17,12 @@ export const createActivity = async (req, res, next) => {
     screenTimeHours,
     socialMediaHours,
     physicalActivityMinutes,
-    caffeineIntakeMg,
     moodScore,
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    socialInteractionScore,
-    financialWorryScore,
-    healthConditionScore,
+    activityStatus,
+    note,
   } = req.validated;
 
   // Fixed: was req.user.userId (always undefined). JWT payload uses { id }.
@@ -39,14 +37,12 @@ export const createActivity = async (req, res, next) => {
     screenTimeHours,
     socialMediaHours,
     physicalActivityMinutes,
-    caffeineIntakeMg,
     moodScore,
     fatigueLevel,
     assignmentLoad,
     deadlinePressure,
-    socialInteractionScore,
-    financialWorryScore,
-    healthConditionScore,
+    activityStatus,
+    note,
   });
 
   if (!activity) {
@@ -56,18 +52,14 @@ export const createActivity = async (req, res, next) => {
   // 2. Call ML service for stress prediction (non-blocking — failure is tolerated)
   const mlPayload = {
     sleep_hours: sleepHours,
+    physical_activity_minutes: physicalActivityMinutes,
     study_hours: studyHours,
     screen_time_hours: screenTimeHours,
     social_media_hours: socialMediaHours,
-    physical_activity_minutes: physicalActivityMinutes,
-    caffeine_intake_mg: caffeineIntakeMg,
-    mood_score: moodScore,
-    fatigue_level: fatigueLevel,
     assignment_load: assignmentLoad,
     deadline_pressure: deadlinePressure,
-    social_interaction_score: socialInteractionScore,
-    financial_worry_score: financialWorryScore,
-    health_condition_score: healthConditionScore,
+    fatigue_level: fatigueLevel,
+    mood_score: moodScore,
   };
 
   const mlResult = await predictStress(mlPayload);
@@ -149,4 +141,100 @@ export const deleteActivity = async (req, res, next) => {
   }
 
   return response(res, 200, 'Aktivitas berhasil dihapus', { deletedActivity });
+};
+
+export const updateActivity = async (req, res, next) => {
+  const { id } = req.params;
+  const { id: userId } = req.user;
+
+  const {
+    activityDate,
+    sleepHours,
+    studyHours,
+    screenTimeHours,
+    socialMediaHours,
+    physicalActivityMinutes,
+    moodScore,
+    fatigueLevel,
+    assignmentLoad,
+    deadlinePressure,
+    activityStatus,
+    note,
+  } = req.validated;
+
+  // 1. Verify owner of the activity
+  const isOwner = await ActivityRepositories.verifyActivityOwner(id, userId);
+
+  if (!isOwner) {
+    return next(
+      new AuthorizationError('Anda tidak berhak memperbarui aktivitas ini'),
+    );
+  }
+
+  // 2. Update activity in DB
+  const activity = await ActivityRepositories.updateActivity(id, {
+    activityDate,
+    sleepHours,
+    studyHours,
+    screenTimeHours,
+    socialMediaHours,
+    physicalActivityMinutes,
+    moodScore,
+    fatigueLevel,
+    assignmentLoad,
+    deadlinePressure,
+    activityStatus,
+    note,
+  });
+
+  if (!activity) {
+    return next(new NotFoundError('Aktivitas tidak ditemukan'));
+  }
+
+  // 3. Call ML service for stress prediction (non-blocking)
+  const mlPayload = {
+    sleep_hours: sleepHours,
+    physical_activity_minutes: physicalActivityMinutes,
+    study_hours: studyHours,
+    screen_time_hours: screenTimeHours,
+    social_media_hours: socialMediaHours,
+    assignment_load: assignmentLoad,
+    deadline_pressure: deadlinePressure,
+    fatigue_level: fatigueLevel,
+    mood_score: moodScore,
+  };
+
+  const mlResult = await predictStress(mlPayload);
+
+  // 4. Save or update prediction if ML returned a result
+  let prediction = null;
+  if (mlResult && mlResult.stress_level && mlResult.stress_score !== undefined) {
+    const existingPred = await PredictionRepositories.getPredictionByActivityId(id);
+    if (existingPred) {
+      prediction = await PredictionRepositories.updatePrediction({
+        activityId: id,
+        predictionDate: activityDate,
+        stressLevel: mlResult.stress_level,
+        stressScore: mlResult.stress_score,
+        confidenceScore: mlResult.confidence_score || null,
+        modelVersion: mlResult.model_version || null,
+      });
+    } else {
+      prediction = await PredictionRepositories.savePrediction({
+        userId,
+        activityId: id,
+        predictionDate: activityDate,
+        stressLevel: mlResult.stress_level,
+        stressScore: mlResult.stress_score,
+        confidenceScore: mlResult.confidence_score || null,
+        modelVersion: mlResult.model_version || null,
+      });
+    }
+  }
+
+  return response(res, 200, 'Aktivitas berhasil diperbarui', {
+    activity,
+    prediction,
+    mlAvailable: mlResult !== null,
+  });
 };

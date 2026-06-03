@@ -4,7 +4,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Hide TensorFlow warnings in terminal
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 import pickle
 import pandas as pd
@@ -13,6 +13,24 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 import joblib
+from dotenv import load_dotenv
+from groq import Groq
+
+# Load environment variables from the script's directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Initialize Groq client
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+groq_client = None
+if GROQ_API_KEY:
+    try:
+        groq_client = Groq(api_key=GROQ_API_KEY)
+        print("[Groq] Client initialized successfully!")
+    except Exception as e:
+        print(f"[Groq] Error initializing client: {e}")
+else:
+    print("[Groq] WARNING: GROQ_API_KEY not found in environment variables. RAG endpoint will be disabled.")
 
 # ============================================================
 # Custom TensorFlow Model Layers & Loss Classes
@@ -126,6 +144,7 @@ try:
         scaler = pickle.load(f)
     with open(os.path.join(MODEL_DIR, 'label_encoder.pkl'), 'rb') as f:
         label_encoder = pickle.load(f)
+    label_encoder.classes_ = np.array(['Low', 'Medium', 'High'])
         
     model = keras.models.load_model(
         os.path.join(MODEL_DIR, 'stress_classifier.keras'),
@@ -136,10 +155,10 @@ try:
     )
     # Features must be in this exact order
     FEATURE_COLS = [
-        'sleep_hours', 'study_hours', 'screen_time_hours', 'social_media_hours',
-        'physical_activity_minutes', 'caffeine_intake_mg', 'mood_score',
-        'fatigue_level', 'assignment_load', 'deadline_pressure',
-        'social_interaction_score', 'financial_worry_score', 'health_condition_score'
+        'sleep_hours', 'physical_activity_minutes', 'study_hours', 'screen_time_hours',
+        'assignment_load', 'deadline_pressure', 'fatigue_level', 'mood_score',
+        'social_media_ratio', 'study_screen_balance', 'academic_pressure_index',
+        'recovery_index', 'digital_pressure_index'
     ]
     print("[Predictor] Model loaded successfully!")
 except Exception as e:
@@ -171,45 +190,48 @@ except Exception as e:
 # Predict Schemas
 class UserInput(BaseModel):
     sleep_hours: float
+    physical_activity_minutes: int
     study_hours: float
     screen_time_hours: float
     social_media_hours: float
-    physical_activity_minutes: int
-    caffeine_intake_mg: int
-    mood_score: int
-    fatigue_level: int
     assignment_load: int
     deadline_pressure: int
-    social_interaction_score: int
-    financial_worry_score: int
-    health_condition_score: int
+    fatigue_level: int
+    mood_score: int
 
 # Recommendation / Insight Shared Schemas
 class InputFeatures(BaseModel):
     sleep_hours: Optional[float] = None
-    mood_score: Optional[float] = None
-    physical_activity: Optional[float] = None
-    screen_time: Optional[float] = None
+    physical_activity_minutes: Optional[float] = None
     study_hours: Optional[float] = None
-    fatigue_score: Optional[float] = None
-    financial_stress: Optional[float] = None
-    health_score: Optional[float] = None
-    caffeine_intake: Optional[float] = None
+    screen_time_hours: Optional[float] = None
+    assignment_load: Optional[float] = None
+    deadline_pressure: Optional[float] = None
+    fatigue_level: Optional[float] = None
+    mood_score: Optional[float] = None
+    social_media_ratio: Optional[float] = None
+    study_screen_balance: Optional[float] = None
+    academic_pressure_index: Optional[float] = None
+    recovery_index: Optional[float] = None
+    digital_pressure_index: Optional[float] = None
+    financial_worry_score: Optional[float] = None
+    health_condition_score: Optional[float] = None
+    caffeine_intake_mg: Optional[float] = None
 
 # Recommendation Schemas
 class RecommendationRequest(BaseModel):
-    user_id: int
-    stress_prediction_id: int
+    user_id: Union[str, int]
+    stress_prediction_id: Union[str, int]
     stress_level: str                   # "low" | "medium" | "high"
     input_features: InputFeatures
     period_type: str = "daily"          # "daily" | "weekly"
-    weekly_summary_id: Optional[int] = None
+    weekly_summary_id: Optional[Union[str, int]] = None
     max_recommendations: int = 3
 
 class RecommendationItem(BaseModel):
-    user_id: int
-    stress_prediction_id: int
-    weekly_summary_id: Optional[int]
+    user_id: Union[str, int]
+    stress_prediction_id: Union[str, int]
+    weekly_summary_id: Optional[Union[str, int]]
     period_type: str
     category: str
     title: str
@@ -224,23 +246,62 @@ class RecommendationResponse(BaseModel):
 
 # Insight Schemas
 class InsightRequest(BaseModel):
-    user_id: int
-    stress_prediction_id: int
+    user_id: Union[str, int]
+    stress_prediction_id: Union[str, int]
     stress_level: str                       # "low" | "medium" | "high"
     input_features: InputFeatures
     period_type: str = "daily"             # "daily" | "weekly"
-    weekly_summary_id: Optional[int] = None
+    weekly_summary_id: Optional[Union[str, int]] = None
     weekly_stress_levels: Optional[List[str]] = None  # Required if period_type is "weekly"
 
 class InsightResponse(BaseModel):
     success: bool
-    user_id: int
-    stress_prediction_id: int
-    weekly_summary_id: Optional[int]
+    user_id: Union[str, int]
+    stress_prediction_id: Union[str, int]
+    weekly_summary_id: Optional[Union[str, int]]
     period_type: str
     insight_text: str
     created_at: str
 
+# RAG Schemas
+class DailyHistoryItem(BaseModel):
+    activity_date: Optional[str] = None
+    sleep_hours: Optional[float] = None
+    physical_activity_minutes: Optional[float] = None
+    study_hours: Optional[float] = None
+    screen_time_hours: Optional[float] = None
+    social_media_hours: Optional[float] = None
+    caffeine_intake_mg: Optional[float] = None
+    mood_score: Optional[float] = None
+    fatigue_level: Optional[float] = None
+    assignment_load: Optional[float] = None
+    deadline_pressure: Optional[float] = None
+    social_interaction_score: Optional[float] = None
+    financial_worry_score: Optional[float] = None
+    health_condition_score: Optional[float] = None
+    social_media_ratio: Optional[float] = None
+    study_screen_balance: Optional[float] = None
+    academic_pressure_index: Optional[float] = None
+    recovery_index: Optional[float] = None
+    digital_pressure_index: Optional[float] = None
+    stress_level: Optional[str] = None
+
+class WeeklyRAGRequest(BaseModel):
+    user_id: Union[str, int]
+    weekly_stress_prediction: str
+    history: List[DailyHistoryItem]
+
+class RAGTextItem(BaseModel):
+    category: str
+    priority_level: str
+    title: str
+    text: str
+
+class WeeklyRAGResponse(BaseModel):
+    success: bool
+    user_id: Union[str, int]
+    insight: str
+    recommendations: List[RAGTextItem]
 
 # ============================================================
 # Helper Functions
@@ -250,30 +311,59 @@ def detect_categories(feats: dict, stress_level: str, period_type: str) -> list:
     sl = stress_level.lower()
 
     if period_type == "weekly":
-        if sl in ("medium", "high"):
-            relevant.append("weekly_target")
+        relevant.append("weekly_target")
         return relevant
 
     if sl == "low":
         return ["maintenance"]
 
-    if feats.get("study_hours", 0) > 7 or sl == "high":
+    # 1. Workload
+    study_hours = feats.get("study_hours")
+    academic_pressure = feats.get("academic_pressure_index")
+    if (study_hours is not None and study_hours > 7) or (academic_pressure is not None and academic_pressure >= 0.6) or sl == "high":
         relevant.append("workload")
-    if feats.get("fatigue_score", 0) >= 7:
+
+    # 2. Recovery
+    fatigue = feats.get("fatigue_level")
+    recovery = feats.get("recovery_index")
+    if (fatigue is not None and fatigue >= 7) or (recovery is not None and recovery < 0.5):
         relevant.append("recovery")
-    if feats.get("mood_score") is not None and feats["mood_score"] < 5:
+
+    # 3. Mood regulation
+    mood = feats.get("mood_score")
+    if mood is not None and mood < 5:
         relevant.append("mood_regulation")
-    if feats.get("sleep_hours") is not None and feats["sleep_hours"] < 7:
+
+    # 4. Sleep
+    sleep = feats.get("sleep_hours")
+    if sleep is not None and sleep < 7:
         relevant.append("sleep")
-    if feats.get("physical_activity") is not None and feats["physical_activity"] < 20:
+
+    # 5. Physical activity
+    phys = feats.get("physical_activity_minutes")
+    if phys is not None and phys < 20:
         relevant.append("physical_activity")
-    if feats.get("screen_time", 0) > 4:
+
+    # 6. Digital habit
+    screen = feats.get("screen_time_hours")
+    digital_pres = feats.get("digital_pressure_index")
+    sm_ratio = feats.get("social_media_ratio")
+    if (screen is not None and screen > 4) or (digital_pres is not None and digital_pres >= 0.6) or (sm_ratio is not None and sm_ratio > 0.4):
         relevant.append("digital_habit")
-    if feats.get("financial_stress", 0) >= 6:
+
+    # 7. Financial habit (legacy field)
+    fin = feats.get("financial_worry_score")
+    if fin is not None and fin >= 6:
         relevant.append("financial_habit")
-    if feats.get("health_score") is not None and feats["health_score"] < 4:
+
+    # 8. Health (legacy field)
+    health = feats.get("health_condition_score")
+    if health is not None and health < 4:
         relevant.append("health")
-    if feats.get("caffeine_intake", 0) >= 3:
+
+    # 9. Caffeine (legacy field)
+    caf = feats.get("caffeine_intake_mg")
+    if caf is not None and caf >= 3:
         relevant.append("caffeine")
 
     if not relevant:
@@ -290,24 +380,54 @@ def detect_factors(feats: dict, sl: str) -> List[str]:
     if sl == "low":
         return ["Stable Routine"]
     scores = {}
-    if feats.get("study_hours", 0) > 7:
-        scores["Academic Pressure"] = feats["study_hours"] - 7
-    if feats.get("sleep_hours") is not None and feats["sleep_hours"] < 7:
-        scores["Sleep Deficit"] = 7 - feats["sleep_hours"]
-    if feats.get("mood_score") is not None and feats["mood_score"] < 5:
-        scores["Low Mood"] = 5 - feats["mood_score"]
-    if feats.get("fatigue_score", 0) >= 7:
-        scores["High Fatigue"] = feats["fatigue_score"] - 6
-    if feats.get("screen_time", 0) > 4:
-        scores["High Screen Time"] = feats["screen_time"] - 4
-    if feats.get("physical_activity") is not None and feats["physical_activity"] < 20:
-        scores["Low Physical Activity"] = (20 - feats["physical_activity"]) / 20
-    if feats.get("financial_stress", 0) >= 6:
-        scores["Financial Worry"] = feats["financial_stress"] - 5
-    if feats.get("health_score") is not None and feats["health_score"] < 4:
-        scores["Health Issue"] = 4 - feats["health_score"]
-    if feats.get("caffeine_intake", 0) >= 3:
-        scores["High Caffeine Intake"] = feats["caffeine_intake"] - 2
+
+    study_hours = feats.get("study_hours")
+    academic_pressure = feats.get("academic_pressure_index")
+    if study_hours is not None or academic_pressure is not None:
+        val_study = study_hours - 7 if study_hours is not None else 0
+        val_acad = academic_pressure * 10 - 6 if academic_pressure is not None else 0
+        if val_study > 0 or val_acad > 0:
+            scores["Academic Pressure"] = max(val_study, val_acad)
+
+    sleep = feats.get("sleep_hours")
+    if sleep is not None and sleep < 7:
+        scores["Sleep Deficit"] = 7 - sleep
+
+    mood = feats.get("mood_score")
+    if mood is not None and mood < 5:
+        scores["Low Mood"] = 5 - mood
+
+    fatigue = feats.get("fatigue_level")
+    recovery = feats.get("recovery_index")
+    if fatigue is not None or recovery is not None:
+        val_fatigue = fatigue - 6 if fatigue is not None else 0
+        val_rec = (0.5 - recovery) * 10 if recovery is not None else 0
+        if val_fatigue > 0 or val_rec > 0:
+            scores["High Fatigue"] = max(val_fatigue, val_rec)
+
+    screen = feats.get("screen_time_hours")
+    digital_pres = feats.get("digital_pressure_index")
+    if screen is not None or digital_pres is not None:
+        val_screen = screen - 4 if screen is not None else 0
+        val_dig = digital_pres * 10 - 6 if digital_pres is not None else 0
+        if val_screen > 0 or val_dig > 0:
+            scores["High Screen Time"] = max(val_screen, val_dig)
+
+    phys = feats.get("physical_activity_minutes")
+    if phys is not None and phys < 20:
+        scores["Low Physical Activity"] = (20 - phys) / 20
+
+    fin = feats.get("financial_worry_score")
+    if fin is not None and fin >= 6:
+        scores["Financial Worry"] = fin - 5
+
+    health = feats.get("health_condition_score")
+    if health is not None and health < 4:
+        scores["Health Issue"] = 4 - health
+
+    caf = feats.get("caffeine_intake_mg")
+    if caf is not None and caf >= 3:
+        scores["High Caffeine Intake"] = caf - 2
     
     detected = sorted(scores, key=scores.get, reverse=True)[:2]
     return detected if detected else (["Academic Pressure"] if sl == "high" else ["Low Mood"])
@@ -365,6 +485,17 @@ def predict_stress(data: UserInput):
 
     try:
         input_dict = data.model_dump() if hasattr(data, 'model_dump') else data.dict()
+        
+        # Calculate derived features using the new formulas
+        screen_time = input_dict['screen_time_hours']
+        social_media = input_dict['social_media_hours']
+        
+        input_dict['social_media_ratio'] = (social_media / screen_time) if screen_time > 0 else 0.0
+        input_dict['study_screen_balance'] = input_dict['study_hours'] / (screen_time + 1.0)
+        input_dict['academic_pressure_index'] = (input_dict['assignment_load'] + input_dict['deadline_pressure']) / 2.0
+        input_dict['recovery_index'] = (input_dict['sleep_hours'] * input_dict['mood_score']) / (input_dict['fatigue_level'] + 1.0)
+        input_dict['digital_pressure_index'] = screen_time + social_media
+        
         input_df = pd.DataFrame([input_dict])[FEATURE_COLS]
         
         # Standardize input features
@@ -461,3 +592,152 @@ def create_insight(req: InsightRequest):
         insight_text=text,
         created_at=now,
     )
+
+@app.post("/weekly-rag", response_model=WeeklyRAGResponse)
+def generate_weekly_rag(req: WeeklyRAGRequest):
+    import json
+    if not groq_client:
+        raise HTTPException(status_code=500, detail="Groq API client is not configured. Please set GROQ_API_KEY.")
+
+    # 1. Structure RAG context
+    history_summary = []
+    for idx, day in enumerate(req.history):
+        day_info = f"Day {idx+1} ({day.activity_date or 'N/A'}): "
+        metrics = []
+        if day.sleep_hours is not None:
+            metrics.append(f"Sleep: {day.sleep_hours} hrs")
+        if day.study_hours is not None:
+            metrics.append(f"Study: {day.study_hours} hrs")
+        if day.screen_time_hours is not None:
+            metrics.append(f"Screen Time: {day.screen_time_hours} hrs")
+        if day.physical_activity_minutes is not None:
+            metrics.append(f"Exercise: {day.physical_activity_minutes} mins")
+        if day.mood_score is not None:
+            metrics.append(f"Mood: {day.mood_score}/10")
+        if day.fatigue_level is not None:
+            metrics.append(f"Fatigue: {day.fatigue_level}/10")
+        if day.academic_pressure_index is not None:
+            metrics.append(f"Academic Pressure Index: {day.academic_pressure_index:.2f}")
+        if day.recovery_index is not None:
+            metrics.append(f"Recovery Index: {day.recovery_index:.2f}")
+        if day.digital_pressure_index is not None:
+            metrics.append(f"Digital Pressure Index: {day.digital_pressure_index:.2f}")
+        if day.stress_level is not None:
+            metrics.append(f"Predicted Stress: {day.stress_level}")
+        
+        day_info += ", ".join(metrics)
+        history_summary.append(day_info)
+        
+    history_context = "\n".join(history_summary)
+
+    # 2. System instruction and prompt
+    system_instruction = (
+        "Anda adalah asisten AI psikolog dan coach gaya hidup mahasiswa yang empati, profesional, dan solutif.\n"
+        "Tugas Anda adalah menganalisis data aktivitas mingguan mahasiswa untuk mendeteksi tren stres, kesehatan, dan produktivitas mereka.\n\n"
+        "ATURAN OUTPUT:\n"
+        "1. Output WAJIB berupa objek JSON valid dengan struktur persis seperti berikut:\n"
+        "{\n"
+        "  \"insight\": \"1 kalimat analisis mendalam tentang tren stres dan faktor dominan mahasiswa selama seminggu ini.\",\n"
+        "  \"recommendations\": [\n"
+        "    {\n"
+        "      \"category\": \"kategori rekomendasi (pilih salah satu dari: academic, health, lifestyle, sleep, social, mindfulness)\",\n"
+        "      \"priority_level\": \"tingkat prioritas (pilih salah satu dari: low, medium, high, urgent)\",\n"
+        "      \"title\": \"Judul Rekomendasi 1 (Singkat, Tindakan)\",\n"
+        "      \"text\": \"Tindakan konkret, praktis, dan personal untuk dilakukan.\"\n"
+        "    },\n"
+        "    {\n"
+        "      \"category\": \"kategori rekomendasi (pilih salah satu dari: academic, health, lifestyle, sleep, social, mindfulness)\",\n"
+        "      \"priority_level\": \"tingkat prioritas (pilih salah satu dari: low, medium, high, urgent)\",\n"
+        "      \"title\": \"Judul Rekomendasi 2 (Singkat, Tindakan)\",\n"
+        "      \"text\": \"Tindakan konkret lainnya yang berbeda dari rekomendasi 1.\"\n"
+        "    },\n"
+        "    {\n"
+        "      \"category\": \"kategori rekomendasi (pilih salah satu dari: academic, health, lifestyle, sleep, social, mindfulness)\",\n"
+        "      \"priority_level\": \"tingkat prioritas (pilih salah satu dari: low, medium, high, urgent)\",\n"
+        "      \"title\": \"Judul Rekomendasi 3 (Singkat, Tindakan)\",\n"
+        "      \"text\": \"Tindakan konkret lainnya yang berbeda dari rekomendasi 1 & 2.\"\n"
+        "    }\n"
+        "  ]\n"
+        "}\n\n"
+        "2. Jumlah INSIGHT harus TEPAT 1.\n"
+        "3. Jumlah REKOMENDASI harus TEPAT 3.\n"
+        "4. Gunakan Bahasa Indonesia yang ramah, memotivasi, dan tidak kaku (gunakan sebutan 'kamu').\n"
+        "5. HINDARI REDUNDANSI/PENGULANGAN antara isi insight dengan ketiga rekomendasi. Setiap rekomendasi harus membahas aspek yang berbeda.\n"
+        "6. JANGAN berikan penjelasan teks tambahan di luar JSON tersebut."
+    )
+
+    user_prompt = (
+        f"Analisis data historis seminggu berikut untuk User ID: {req.user_id}.\n\n"
+        f"Prediksi Tingkat Stres Mingguan: {req.weekly_stress_prediction}\n\n"
+        f"Data Historis Harian:\n"
+        f"{history_context}\n\n"
+        "Ingat, kembalikan respon dalam format JSON sesuai spesifikasi di instruksi sistem."
+    )
+
+    # 3. Call Groq API
+    try:
+        response = groq_client.chat.completions.create(
+            model="openai/gpt-oss-20b",
+            messages=[
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": user_prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.7,
+            max_tokens=1000
+        )
+        
+        raw_content = response.choices[0].message.content
+        result_json = json.loads(raw_content)
+        
+        if "insight" not in result_json or "recommendations" not in result_json:
+            raise ValueError("Response JSON missing required keys.")
+            
+        insight_raw = result_json["insight"]
+        if isinstance(insight_raw, dict):
+            insight_text = insight_raw.get("text", insight_raw.get("title", str(insight_raw)))
+        else:
+            insight_text = str(insight_raw)
+            
+        recommendations_data = result_json["recommendations"]
+        
+        recommendations_items = []
+        valid_categories = {"academic", "health", "lifestyle", "sleep", "social", "mindfulness"}
+        valid_priorities = {"low", "medium", "high", "urgent"}
+        
+        for item in recommendations_data[:3]:
+            cat = str(item.get("category", "lifestyle")).lower().strip()
+            if cat not in valid_categories:
+                cat = "lifestyle"
+                
+            priority = str(item.get("priority_level", "medium")).lower().strip()
+            if priority not in valid_priorities:
+                priority = "medium"
+
+            recommendations_items.append(RAGTextItem(
+                category=cat,
+                priority_level=priority,
+                title=item.get("title", "Rekomendasi Tindakan"),
+                text=item.get("text", "Lakukan aktivitas yang seimbang.")
+            ))
+            
+        while len(recommendations_items) < 3:
+            recommendations_items.append(RAGTextItem(
+                category="lifestyle",
+                priority_level="medium",
+                title="Jaga Keseimbangan",
+                text="Luangkan waktu 15 menit untuk relaksasi atau aktivitas tanpa layar."
+            ))
+            
+        return WeeklyRAGResponse(
+            success=True,
+            user_id=req.user_id,
+            insight=insight_text,
+            recommendations=recommendations_items
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Gagal menghasilkan RAG AI insight/rekomendasi: {str(e)}"
+        )

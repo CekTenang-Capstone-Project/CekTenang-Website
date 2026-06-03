@@ -6,16 +6,16 @@ class InsightRepositories {
     this.pool = new Pool();
   }
 
-  async saveInsight({ userId, weeklySummaryId = null, periodType = 'weekly', insightText }) {
+  async saveInsight({ userId, summaryId = null, insightText }) {
     const id = nanoid(16);
     const createdAt = new Date().toISOString();
 
     const query = {
       text: `INSERT INTO insights
-               (id, user_id, weekly_summary_id, period_type, insight_text, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6)
+               (id, user_id, summary_id, insight_text, created_at)
+             VALUES ($1, $2, $3, $4, $5)
              RETURNING *`,
-      values: [id, userId, weeklySummaryId, periodType, insightText, createdAt],
+      values: [id, userId, summaryId, insightText, createdAt],
     };
 
     const result = await this.pool.query(query);
