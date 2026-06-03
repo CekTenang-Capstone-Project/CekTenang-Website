@@ -31,22 +31,22 @@ const data = [
   },
 ];
 
-function AcademicCondition() {
+function AcademicCondition({ items = data }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-      <h3 className="font-semibold text-xl mb-8">
+    <div className="bg-zinc-900/70 border border-white/10 rounded-2xl p-6">
+      <h3 className="font-semibold text-xl mb-8 text-white">
         Rata-Rata Kondisi Akademik
       </h3>
 
       <div className="space-y-6">
-        {data.map((item) => (
+        {items.map((item) => (
           <div key={item.label}>
             <div className="flex justify-between text-xs mb-2">
-              <span>{item.label}</span>
-              <span>{item.value}</span>
+              <span className="text-zinc-300">{item.label}</span>
+              <span className="text-zinc-400">{item.value}</span>
             </div>
 
-            <div className="h-1 bg-zinc-800 rounded-full">
+            <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${item.color}`}
                 style={{ width: item.width }}

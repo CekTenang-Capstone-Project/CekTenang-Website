@@ -1,13 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createActivity } from "../../services/activityService";
 import { initialActivityForm } from "./activityFormConstants";
 import buildActivityPayload from "./buildActivityPayload";
+
+const DRAFT_KEY = "activityDraft";
 
 function useActivityForm(t) {
   const [form, setForm] = useState(initialActivityForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [showAnalysis, setShowAnalysis] = useState(false);
+
+  useEffect(() => {
+    const draft = localStorage.getItem(DRAFT_KEY);
+    if (!draft) {
+      return;
+    }
+
+    try {
+      const parsedDraft = JSON.parse(draft);
+      setForm((currentForm) => ({
+        ...currentForm,
+        ...parsedDraft,
+      }));
+    } catch {
+      localStorage.removeItem(DRAFT_KEY);
+    }
+  }, []);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -17,6 +37,7 @@ function useActivityForm(t) {
     }));
     setError("");
     setMessage("");
+    setShowAnalysis(false);
   }
 
   async function handleSubmit(event) {
@@ -36,6 +57,7 @@ function useActivityForm(t) {
     }
 
     setMessage(responseMessage || t.ActivitySuccessMessage);
+    setShowAnalysis(true);
     setForm((currentForm) => ({
       ...initialActivityForm,
       activityDate: currentForm.activityDate,
@@ -43,13 +65,23 @@ function useActivityForm(t) {
     setIsSubmitting(false);
   }
 
+  function handleSaveDraft(event) {
+    event.preventDefault();
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+    setError("");
+    setMessage(t.ActivityDraftSavedMessage);
+    setShowAnalysis(false);
+  }
+
   return {
     error,
     form,
     handleChange,
     handleSubmit,
+    handleSaveDraft,
     isSubmitting,
     message,
+    showAnalysis,
   };
 }
 

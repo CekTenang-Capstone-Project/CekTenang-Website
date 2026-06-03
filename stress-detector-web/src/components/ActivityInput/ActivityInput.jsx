@@ -37,18 +37,25 @@ function ActivityInput({ field, value, onChange }) {
       <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">
         {field.label}
       </span>
-      <input
-        name={field.name}
-        type={field.type || "number"}
-        min={field.min}
-        max={field.max}
-        step={field.step || "1"}
-        value={value}
-        onChange={onChange}
-        placeholder={field.placeholder}
-        required={field.required ?? true}
-        className="h-12 rounded-lg border border-white/5 bg-zinc-900 px-4 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-blue-300"
-      />
+      <div className="relative">
+        <input
+          name={field.name}
+          type={field.type || "number"}
+          min={field.min}
+          max={field.max}
+          step={field.step || "1"}
+          value={value}
+          onChange={onChange}
+          placeholder={field.placeholder}
+          required={field.required ?? true}
+          className={`h-14 w-full rounded-xl border border-zinc-800 bg-[#0F1117] px-4 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-blue-300 ${field.suffix ? "pr-16" : ""}`}
+        />
+        {field.suffix && (
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-zinc-400">
+            {field.suffix}
+          </span>
+        )}
+      </div>
     </label>
   );
 }

@@ -5,6 +5,7 @@ const initialActivityForm = {
   screenTimeHours: "",
   socialMediaHours: "",
   physicalActivityMinutes: "",
+  dailyNote: "",
   caffeineIntakeMg: "0",
   moodScore: "0",
   fatigueLevel: "0",

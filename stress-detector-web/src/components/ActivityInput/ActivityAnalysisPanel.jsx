@@ -34,7 +34,11 @@ function getStressCategory(score, t) {
   };
 }
 
-function ActivityAnalysisPanel({ form, t }) {
+function ActivityAnalysisPanel({ form, t, visible = true }) {
+  if (!visible) {
+    return null;
+  }
+
   const stressIndex = getStressIndex(form);
   const stressCategory = getStressCategory(stressIndex, t);
 
@@ -51,7 +55,7 @@ function ActivityAnalysisPanel({ form, t }) {
             </h2>
           </div>
           <span className={`rounded-full ${stressCategory.bgcolorTag} px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${stressCategory.tag}`}>
-            Live Sync
+            {t.ActivityAnalysisTag}
           </span>
         </div>
 
@@ -88,46 +92,6 @@ function ActivityAnalysisPanel({ form, t }) {
           </div>
         </div>
       </section>
-
-      <section className="rounded-xl border border-white/10 bg-[#171717] p-5 md:p-6">
-        <div className="mb-5 flex items-center gap-3">
-          <span className="text-sm font-bold text-blue-300">AI</span>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-200">
-            {t.ActivityAiRecommendationTitle}
-          </h2>
-        </div>
-
-        <div className="space-y-5 text-sm leading-relaxed text-zinc-300">
-          <div className="flex gap-4">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-xs font-bold text-emerald-300">
-              1
-            </span>
-            <p>{t.ActivityAiRecommendationOne}</p>
-          </div>
-          <div className="flex gap-4">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-xs font-bold text-blue-300">
-              2
-            </span>
-            <p>{t.ActivityAiRecommendationTwo}</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-xl bg-zinc-800 p-5 md:p-6">
-        <div className="flex gap-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-bold text-emerald-300">
-            TIP
-          </span>
-          <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-white">
-              {t.ActivityQuickTipsTitle}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-              {t.ActivityQuickTipsDescription}
-            </p>
-          </div>
-        </div>
-      </section>
     </aside>
   );
 }
@@ -135,6 +99,7 @@ function ActivityAnalysisPanel({ form, t }) {
 ActivityAnalysisPanel.propTypes = {
   form: PropTypes.objectOf(PropTypes.string).isRequired,
   t: PropTypes.objectOf(PropTypes.string).isRequired,
+  visible: PropTypes.bool,
 };
 
 export default ActivityAnalysisPanel;

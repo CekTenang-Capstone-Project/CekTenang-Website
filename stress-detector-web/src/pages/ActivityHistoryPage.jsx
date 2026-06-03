@@ -111,7 +111,7 @@ const activityHistoryData = [
 
 function ActivityHistoryPage() {
   const [statusFilter, setStatusFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("7-day");
+  const [dateFilter, setDateFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 7;
@@ -194,15 +194,12 @@ function ActivityHistoryPage() {
   return (
     <Layout title="Riwayat Aktivitas" name="User" role="User">
       <div className="space-y-6 text-sm">
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
-          <h1 className="text-sm font-semibold text-white">Riwayat Aktivitas</h1>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+          <p className="max-w-2xl text-sm text-zinc-400">
             Pantau riwayat jurnal harian yang telah Anda isi sebelumnya.
           </p>
-        </div>
+        
 
-        <div className="space-y-6 rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
-          <div className="text-sm font-semibold text-white">Filter dan Sort</div>
+        <div className="space-y-6 rounded-3xl p6">
 
           <ActivityHistoryFilters
             statusFilter={statusFilter}

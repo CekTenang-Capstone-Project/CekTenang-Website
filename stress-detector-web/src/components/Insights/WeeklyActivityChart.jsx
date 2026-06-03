@@ -3,6 +3,8 @@ import {
   LineChart,
   Line,
   Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 const data = [
@@ -17,22 +19,38 @@ const data = [
 
 function WeeklyActivityChart() {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-      <h3 className="font-semibold text-xl mb-5">
+    <div className="bg-zinc-900/70 border border-white/10 rounded-2xl p-6">
+      <h3 className="font-semibold text-xl mb-5 text-white">
         Metrik Aktivitas Mingguan
       </h3>
 
       <div className="h-[250px]">
         <ResponsiveContainer>
           <LineChart data={data}>
-            <Tooltip />
+            <XAxis
+              dataKey="day"
+              stroke="#71717a"
+              style={{ fontSize: "12px" }}
+            />
+            <YAxis
+              stroke="#71717a"
+              style={{ fontSize: "12px" }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#1f2937",
+                border: "1px solid #3f3f46",
+                borderRadius: "8px",
+              }}
+            />
 
             <Line
               type="monotone"
               dataKey="value"
               stroke="#c4d3ff"
               strokeWidth={3}
-              dot
+              dot={{ fill: "#c4d3ff", r: 4 }}
+              activeDot={{ r: 6 }}
             />
           </LineChart>
         </ResponsiveContainer>

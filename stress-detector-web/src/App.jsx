@@ -11,6 +11,7 @@ import DashboardPage from "./pages/DashboardPages"
 import LogActivitiesPage from "./pages/LogActivitiesPages"
 import ActivityHistoryPage from "./pages/ActivityHistoryPage"
 import InsightPage from "./pages/InsightsPage"
+import ProfilePage from "./pages/ProfilePage"
 
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/LogActivity" element={<LogActivitiesPage />} />
           <Route path="/activity-history" element={<ActivityHistoryPage />} />
           <Route path="/Insight" element={<InsightPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
 
 
           <Route path="/register" element={<RegisterPage />} />

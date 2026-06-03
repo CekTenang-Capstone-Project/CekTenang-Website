@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import calender from "../../assets/icons/calendar.svg"
 
 const statusOptions = [
   { value: "all", label: "Semua" },
@@ -8,11 +9,11 @@ const statusOptions = [
 ];
 
 const dateOptions = [
+  { value: "all", label: "Semua data" },
   { value: "7-day", label: "7 hari terakhir" },
   { value: "this-month", label: "Bulan ini" },
   { value: "last-month", label: "Bulan lalu" },
   { value: "3-month", label: "3 Bulan terakhir" },
-  { value: "all", label: "Semua data" },
 ];
 
 const sortOptions = [
@@ -32,16 +33,16 @@ function ActivityHistoryFilters({
 }) {
   return (
     <div className="space-y-4 text-sm">
-      <div className="flex flex-wrap gap-2">
+      <div className="inline-flex w-full max-w-[620px] items-center gap-1 rounded-2xl border border-zinc-800 bg-zinc-900 p-1">
         {statusOptions.map((option) => (
           <button
             key={option.value}
             type="button"
             onClick={() => setStatusFilter(option.value)}
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+            className={`flex-1 rounded-xl px-6 py-4 text-sm font-semibold transition-all duration-200 ${
               statusFilter === option.value
-                ? "border-blue-400 bg-blue-500/10 text-blue-200"
-                : "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-600 hover:text-white"
+                ? "bg-blue-400 text-slate-900 shadow-sm"
+                : "bg-transparent text-zinc-400 hover:text-white"
             }`}
           >
             {option.label}
@@ -49,28 +50,24 @@ function ActivityHistoryFilters({
         ))}
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        <label className="block text-sm font-semibold text-zinc-300">
-          Filter Waktu
+      <div className="flex items-center gap-3 md:ml-auto">
           <select
             value={dateFilter}
             onChange={(event) => setDateFilter(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400"
+            className="h-11 min-w-(140px) rounded-xl border border-zinc-800 bg-zinc-900 px-4 text-sm text-white outline-none transition focus:border-zinc-700"
           >
+            <img src={calender} alt="" />
             {dateOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
-        </label>
-
-        <label className="block text-sm font-semibold text-zinc-300">
-          Urutkan
+        
           <select
             value={sortOption}
             onChange={(event) => setSortOption(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400"
+            className="mt-2 w-30 rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-400"
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -78,7 +75,6 @@ function ActivityHistoryFilters({
               </option>
             ))}
           </select>
-        </label>
       </div>
     </div>
   );
