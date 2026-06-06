@@ -79,11 +79,11 @@ function TodayDiagnose({items, studyTime, taskLoad, deadlinePressure, physicalAc
           display: `${value} ${t.HourText}`,
           width: Math.min((value / 8) * 100, 100),
           color:
-            value >= 7
+            value < 6
+              ? "bg-red-500"
+              : value <= 8
               ? "bg-green-500"
-              : value >= 5
-              ? "bg-yellow-500"
-              : "bg-red-500",
+              : "bg-yellow-500",
         };
 
       default:

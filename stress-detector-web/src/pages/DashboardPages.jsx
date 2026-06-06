@@ -254,25 +254,25 @@ function DashboardPage() {
     {
       label: t.MoodScoreTitle,
       metric: {
-        display: moodScore.toString(),
-        width: Math.min(moodScore, 100),
+        display: `${moodScore}/10`,
+        width: Math.min(moodScore * 10, 100),
         color:
-          moodScore <= 25
-            ? "bg-green-500"
-            : moodScore <= 65
+          moodScore <= 3
+            ? "bg-red-500"
+            : moodScore <= 6
             ? "bg-yellow-500"
-            : "bg-red-500",
+            : "bg-green-500",
       },
     },
     {
       label: t.FatigueLevelTitle,
       metric: {
-        display: fatigueLevel.toString(),
-        width: Math.min(fatigueLevel, 100),
+        display: `${fatigueLevel}/10`,
+        width: Math.min(fatigueLevel * 10, 100),
         color:
-          fatigueLevel < 40
+          fatigueLevel <= 3
             ? "bg-green-500"
-            : fatigueLevel < 70
+            : fatigueLevel <= 6
             ? "bg-yellow-500"
             : "bg-red-500",
       },
@@ -322,11 +322,11 @@ function DashboardPage() {
         display: `${sleepHours} ${t.HourText}`,
         width: Math.min((sleepHours / 8) * 100, 100),
         color:
-          sleepHours >= 7
+          sleepHours < 6
+            ? "bg-red-500"
+            : sleepHours <= 8
             ? "bg-green-500"
-            : sleepHours >= 5
-            ? "bg-yellow-500"
-            : "bg-red-500",
+            : "bg-yellow-500",
       },
     },
   ];
