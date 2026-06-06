@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import AcademicCondition from "../components/Insights/AcademicCondition";
 import AINarrativeCard from "../components/Insights/AINarrativeCard";
 import PriorityCard from "../components/Insights/PriorityCard";
@@ -98,6 +99,7 @@ const fetchPredictions = async () => {
 function InsightPage() {
   const { user } = useUser();
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -399,6 +401,8 @@ function InsightPage() {
           title={t.AINarrativeInsightTitle}
           subtitle={narrativeSubtitle}
           description={latestInsightDescription}
+          isEmpty={!narrativeInsight}
+          onActionClick={() => navigate("/LogActivity")}
         />
 
         {/* Section 3: Academic Condition Metrics */}
@@ -434,7 +438,44 @@ function InsightPage() {
                 />
               ))
             ) : (
-              <div className="col-span-full theme-muted">{t.InsightsNoPriorityToday}</div>
+              <div className="col-span-full theme-card border rounded-2xl p-6 text-center space-y-4">
+                <div className="flex justify-center">
+                  <div className="p-4 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-8 w-8 text-blue-400 animate-pulse"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="max-w-md mx-auto space-y-2">
+                  <h4 className="theme-text font-bold text-lg">
+                    {t.DashboardDateLocale === "id-ID" ? "Belum Ada Rekomendasi" : "No Recommendations Yet"}
+                  </h4>
+                  <p className="theme-muted text-sm leading-relaxed">
+                    {t.DashboardDateLocale === "id-ID"
+                      ? "Rekomendasi personal dari AI akan muncul di sini setelah Anda mengisi jurnal harian dan sistem mendeteksi pola aktivitas Anda."
+                      : "Personalized AI recommendations will appear here once you fill out your daily journal and the system analyzes your activity patterns."}
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <button
+                    onClick={() => navigate("/LogActivity")}
+                    className="px-5 py-2.5 rounded-xl bg-blue-500 text-white font-semibold text-xs transition hover:bg-blue-600 shadow-md shadow-blue-500/20 cursor-pointer"
+                  >
+                    {t.DashboardDateLocale === "id-ID" ? "+ Mulai Isi Jurnal" : "+ Start Journaling"}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
